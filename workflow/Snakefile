@@ -9,12 +9,9 @@ from utils import *
 
 # Load program parameters and resources
 configfile: 'configs/parameters.yaml'
-#configfile: '/athena/masonlab/scratch/users/btt4001/camp_dev/camp_qualitycontrol/configs/resources.yaml'
-
 
 # Load and/or make the working directory structure
 dirs = Workflow_Dirs(config['work_dir'], 'quality_control_output')
-
 
 # Load sample names and input files 
 SAMPLES = ingest_samples(config['samples'], dirs.TMP)
