@@ -26,7 +26,7 @@ def run(workflow, work_dir, samples, unit_test, slurm, cap2):
 
     # Set location of rule (and program) parameters and resources
     pyaml = join('/', *bin_dir, 'configs', 'parameters.yaml')
-    ryaml = join('/', *bin_dir, 'resources', 'bash.yaml')
+    ryaml = join('/', *bin_dir, 'configs', 'resources', 'bash.yaml')
 
     # Set location of compute cluster profile
     cluster_config = join('/', *bin_dir, 'configs', 'resources', 'slurm.yaml') \
