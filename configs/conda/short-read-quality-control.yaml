@@ -1,4 +1,4 @@
-name: camp_qc
+name: short-read-quality-control
 channels:
   - conda-forge
   - bioconda
