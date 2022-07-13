@@ -8,7 +8,7 @@ from utils import *
 
 
 # Load program parameters and resources
-configfile: '/athena/masonlab/scratch/users/btt4001/camp_dev/camp_qualitycontrol/configs/parameters.yaml'
+configfile: 'configs/parameters.yaml'
 #configfile: '/athena/masonlab/scratch/users/btt4001/camp_dev/camp_qualitycontrol/configs/resources.yaml'
 
 
