@@ -1,0 +1,19 @@
+# """
+# Author: Lauren Mak
+# Adapted from: John Blishchak's simple Slurm Snakemake profile
+# Source: https://github.com/jdblischak/smk-simple-slurm/blob/main/simple/config.yaml
+# """
+
+default-resources:
+  - threads=1
+  - mem_mb=1000
+restart-times: 3
+max-jobs-per-second: 10
+max-status-checks-per-second: 1
+local-cores: 1
+latency-wait: 60
+jobs: 500
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+# use-conda: True

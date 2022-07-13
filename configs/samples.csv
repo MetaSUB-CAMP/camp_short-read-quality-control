@@ -1,0 +1,2 @@
+sample_name,illumina_fwd,illumina_rev
+gut,~/GitHub/camp_short-read-quality-control/test_data/gut_1.fastq,~/GitHub/camp_short-read-quality-control/test_data/gut_2.fastq

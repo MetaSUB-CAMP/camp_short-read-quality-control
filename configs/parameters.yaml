@@ -1,0 +1,12 @@
+# --- Parameters --- #
+
+# --- adapter_removal --- #
+
+adapterremoval_threads: 8
+adapterremoval_minquality: 2
+adapterremoval_adapter1: AGATCGGAAGAGC
+adapterremoval_adapter2: AGATCGGAAGAGC
+
+# --- host_read_removal --- #
+
+host_removal_reference_database: /athena/masonlab/scratch/users/btt4001/databases/hg38/GRCh38_noalt_as/GRCh38_noalt_as
