@@ -9,10 +9,13 @@ import pandas as pd
 def ingest_samples(samples, tmp):
     df = pd.read_csv(samples, header = 0, index_col = 0) 
     s = list(df.index)
+    print(df)
     lst = df.values.tolist()
     for f in os.listdir(tmp):
         os.system("rm -rf " + join(tmp, f))
     for i,l in enumerate(lst):
+        print([l[0], join(tmp, s[i] + '_1.fastq')])
+        print([l[1], join(tmp, s[i] + '_1.fastq')])
         symlink(l[0], join(tmp, s[i] + '_1.fastq'))
         symlink(l[1], join(tmp, s[i] + '_2.fastq'))
     return s

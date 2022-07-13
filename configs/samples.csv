@@ -1,2 +1,2 @@
-sample_name,illumina_fwd,illumina_rev
-gut,~/GitHub/camp_short-read-quality-control/test_data/gut_1.fastq,~/GitHub/camp_short-read-quality-control/test_data/gut_2.fastq
+,illumina_fwd,illumina_rev
+gut,/athena/masonlab/scratch/users/btt4001/camp_dev/camp_short-read-quality-control/test_data/gut_1.fastq,/athena/masonlab/scratch/users/btt4001/camp_dev/camp_short-read-quality-control/test_data/gut_2.fastq
