@@ -4,6 +4,7 @@
 import click
 from os.path import abspath, exists, join
 from snakemake import snakemake
+from os import makedirs
 
 
 @click.command('run')
