@@ -1,0 +1,26 @@
+#'''Command-line usage resource config.'''#
+
+
+# --- filter_lowqual --- #
+
+filter_lowqual_threads: 10
+filter_lowqual_mem_mb: 40000
+
+
+# --- filter_adapters --- #
+
+filter_adapters_threads: 10
+filter_adapters_mem_mb: 40000
+
+
+# --- filter_host_reads --- #
+
+filter_host_reads_threads: 40
+filter_host_reads_mem_mb: 40000
+
+
+# --- filter_seq_errors --- #
+
+filter_seq_errors_threads: 40
+filter_seq_errors_mem_mb: 80000
+

@@ -1,0 +1,2 @@
+sample_name,illumina_fwd,illumina_rev
+zymo_pos_ctrl,test_out/short_read_qc/2_error_correct/zymo_pos_ctrl_1.fastq.gz,test_out/short_read_qc/2_error_correct/zymo_pos_ctrl_2.fastq.gz
