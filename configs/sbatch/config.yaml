@@ -1,0 +1,13 @@
+cluster:
+  sbatch
+    --cpus-per-task={threads}
+    --mem={resources.mem_mb}
+    --job-name={wildcards}.{rulename}.{jobid}
+    --output={log}
+cluster-cancel:
+  scancel
+default-resources:
+  - mem_mb=8000
+  - disk_mb=200000
+max-status-checks-per-second: 1
+

@@ -2,12 +2,20 @@
 
 
 import click
-from os import makedirs
-from os.path import abspath, exists, join
+from click_default_group import DefaultGroup
+from os import getcwd, makedirs
+from os.path import abspath, dirname, exists, join
 from snakemake import snakemake, main
+from shutil import rmtree
+from utils import Workflow_Dirs, print_cmds, cleanup_files
 
 
-def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir):
+@click.group(cls = DefaultGroup, default = 'run', default_if_no_args = True)
+def cli():
+    pass
+
+
+def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, s_dir):
     cfg_wd = 'work_dir=%s' % work_dir
     cfg_sp = 'samples=%s' % samples
     cfg_ey = 'env_yamls=%s' % env_yamls
@@ -16,15 +24,18 @@ def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir)
         '--config',         *{cfg_wd, cfg_sp, cfg_ey},
         '--configfiles',    *[pyaml, ryaml],
         '--jobs',           str(cores),
+        '--restart-times',  '2',
         '--use-conda',
         '--conda-frontend', 'conda',
         '--conda-prefix',   env_dir,
-        '--cluster',        "sbatch -J {wildcards}.{rulename}.{jobid} \
-                             -n {threads} --mem {resources.mem_mb} -o {log}"
+        '--printshellcmds',
+        '--keep-going',
+        '--latency-wait',   '60',
+        '--profile',        s_dir
     ])
 
 
-def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, unit_test_dir):
+def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, unit_test_dir, dry_run, unlock):
     snakemake(
         workflow,
         config = {
@@ -37,51 +48,93 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
             ryaml
         ],
         cores = cores,
+        restart_times = 2,
         use_conda = True,
         conda_prefix = env_dir,
-        generate_unit_tests = unit_test_dir
+        printshellcmds = True,
+        keepgoing = True,
+        latency_wait = 60,
+        generate_unit_tests = unit_test_dir,
+        dryrun = dry_run,
+        unlock = unlock
     )
 
 
-@click.command('run')
-@click.option('-w', '--workflow', type = click.Path(), required = True, \
-    help = 'Absolute path to the Snakefile')
+@cli.command('run')
 @click.option('-c', '--cores', type = int, default = 1, show_default = True, \
     help = 'In local mode, the number of CPU cores available to run rules. \n\
     In Slurm mode, the number of sbatch jobs submitted in parallel. ')
 @click.option('-d', '--work_dir', type = click.Path(), required = True, \
     help = 'Absolute path to working directory')
 @click.option('-s', '--samples', type = click.Path(), required = True, \
-    help = 'Sample CSV in format [sample_name,...,]') # Update the samples.csv fields
+    help = 'Sample CSV in format [sample_name,...,]')
 @click.option('--unit_test', is_flag = True, default = False, \
     help = 'Generate unit tests using Snakemake API')
 @click.option('--slurm', is_flag = True, default = False, \
     help = 'Run workflow by submitting rules as Slurm cluster jobs')
-def run(workflow, cores, work_dir, samples, unit_test, slurm): 
+@click.option('--dry_run', is_flag = True, default = False, \
+    help = 'Set up directory structure and print workflow commands to be run separately')
+@click.option('--unlock', is_flag = True, default = False, \
+    help = 'Remove a lock on the work directory')
+def run(cores, work_dir, samples, unit_test, slurm, dry_run, unlock): 
     # Get the absolute path of the Snakefile to find the profile configs
-    main_dir = abspath(workflow).split('/')[:-2] # /path/to/main_dir/workflow/Snakefile
+    main_dir = dirname(dirname(abspath(__file__))) # /path/to/main_dir/workflow/cli.py
+    workflow = join(main_dir, 'workflow', 'Snakefile')
 
     # Set location of rule (and program) parameters and resources
-    pyaml = join('/', *main_dir, 'configs', 'parameters.yaml')
-    ryaml = join('/', *main_dir, 'configs', 'resources.yaml')
+    pyaml = join(main_dir, 'configs', 'parameters.yaml')
+    ryaml = join(main_dir, 'configs', 'resources.yaml')
 
     # Set up the conda environment directory
-    env_dir = join('/', *main_dir, 'conda_envs')
+    env_dir = join(main_dir, 'conda_envs')
     if not exists(env_dir):
         makedirs(env_dir)
-    env_yamls = join('/', *main_dir, 'configs', 'conda')
+    env_yamls = join(main_dir, 'configs', 'conda')
 
     # If generating unit tests, set the unit test directory (by default, is pytest's default, .tests)
-    unit_test_dir = join('/', *main_dir, '.tests/unit') if unit_test else None
+    unit_test_dir = join(main_dir, '.tests/unit') if unit_test else None
 
+    # If rules failed previously, unlock the directory
+    if unlock:
+        cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
+                 cores, env_dir, unit_test_dir, False, unlock)        
+        rmtree(join(getcwd(), '.snakemake'))
+        
     # Run workflow
     if slurm:
         sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml,     \
-               cores, env_dir)
+               cores, env_dir, join(main_dir, 'configs', 'sbatch'))
+    elif dry_run:
+        # Set up the directory structure skeleton
+        Workflow_Dirs(work_dir, 'short-read-taxonomy')
+        # Print the dry run standard out
+        cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
+                 cores, env_dir, unit_test_dir, True, False)
     else:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, unit_test_dir)
+                 cores, env_dir, unit_test_dir, False, False)
 
 
-if __name__ == "__main__":
-    run()
+@cli.command('cleanup')
+@click.option('-d', '--work_dir', type = click.Path(), required = True, \
+    help = 'Absolute path to working directory')
+@click.option('-s', '--samples', type = click.Path(), required = True, \
+    help = 'Sample CSV in format [sample_name,...,]')
+def cleanup(work_dir, samples): 
+    df = pd.read_csv(samples, header = 0, index_col = 0) # name, fwd, rev
+    cleanup_files(work_dir, df)
+
+
+@cli.command('commands')
+@click.argument('input', type = click.Path(), required = True)
+def commands(input): 
+    print_cmds(input)
+
+
+cli.add_command(run)
+cli.add_command(cleanup)
+cli.add_command(commands)
+
+
+if __name__ == '__main__':
+    cli()

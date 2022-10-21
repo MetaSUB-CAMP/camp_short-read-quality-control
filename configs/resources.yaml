@@ -1,6 +1,9 @@
 #'''Command-line usage resource config.'''#
 
 
+count_reads_mem_mb: 100000
+
+
 # --- filter_lowqual --- #
 
 filter_lowqual_threads: 10
@@ -21,6 +24,6 @@ filter_host_reads_mem_mb: 40000
 
 # --- filter_seq_errors --- #
 
-filter_seq_errors_threads: 40
-filter_seq_errors_mem_mb: 80000
+filter_seq_errors_threads: 12
+filter_seq_errors_mem_mb: 150000
 
