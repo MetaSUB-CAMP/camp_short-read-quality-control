@@ -17,6 +17,10 @@ dirs = Workflow_Dirs(config['work_dir'], 'short_read_qc')
 SAMPLES = ingest_samples(config['samples'], dirs.TMP)
 
 
+# Configure optional flags
+dedup_flag = '--dedup' if config['dedup'] else '--dont_eval_duplication'
+
+
 # --- Workflow output --- #
 
 
@@ -25,6 +29,15 @@ rule all:
         expand(join(dirs.OUT, 'final_reports', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
         join(dirs.OUT, 'final_reports', 'read_stats.csv'),
         join(dirs.OUT, 'final_reports', 'samples.csv')
+
+
+def workflow_mode(wildcards):
+    if config['use_host_filter']:
+        return { 'fwd' : join(dirs.OUT, '2_host_removal', '{sample}_1.fastq.gz'),
+                 'rev' : join(dirs.OUT, '2_host_removal', '{sample}_2.fastq.gz')}
+    else:
+        return { 'fwd' : join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
+                 'rev' : join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz')}
 
 
 # --- Workflow modules --- #
@@ -46,12 +59,13 @@ rule filter_low_qual:
         mem_mb = config['filter_lowqual_mem_mb'],
     params:
         minqual = config['minqual'],
+        dedup = dedup_flag,
         sample = '{sample}',
         out_dir = join(dirs.OUT, '0_lowqual_removal'),
     shell:
         """
         fastp -i {input.fwd} -I {input.rev} -o {output.fwd} -O {output.rev} \
-            -q {params.minqual} --dont_eval_duplication --thread {threads} \
+            -q {params.minqual} {params.dedup} --thread {threads} \
             -j {params.out_dir}/{params.sample}.json \
             -h {params.out_dir}/{params.sample}.html > {log} 2>&1
         """
@@ -110,8 +124,7 @@ rule filter_host_reads:
 
 rule filter_seq_errors:
     input:
-        fwd = join(dirs.OUT, '2_host_removal', '{sample}_1.fastq.gz'),
-        rev = join(dirs.OUT, '2_host_removal', '{sample}_2.fastq.gz'),
+        workflow_mode,
     output:
         fwd = join(dirs.OUT, '3_error_removal', '{sample}', 'corrected', '{sample}_1.fastq.00.0_0.cor.fastq.gz'),
         rev = join(dirs.OUT, '3_error_removal', '{sample}', 'corrected', '{sample}_2.fastq.00.0_0.cor.fastq.gz'),
