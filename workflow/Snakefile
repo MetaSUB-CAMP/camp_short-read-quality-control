@@ -5,7 +5,7 @@ from contextlib import redirect_stderr
 import os
 from os.path import basename, join
 import pandas as pd
-from shutil import copy
+from shutil
 from utils import Workflow_Dirs, ingest_samples, calc_read_lens, sample_statistics
 
 
@@ -272,8 +272,8 @@ rule make_config:
         multiqc_dir = join(dirs.OUT, '4_summary'),
         samples = SAMPLES,
     run:
-        copy(str(input.mqc[0]), str(output.pre))
-        copy(str(input.mqc[1]), str(output.post))
+        shutil.copy(str(input.mqc[0]), str(output.pre))
+        shutil.copy(str(input.mqc[1]), str(output.post))
         dct = {}
         for i in params.samples:
             s = i.split('/')[-1]
