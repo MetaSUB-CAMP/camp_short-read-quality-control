@@ -90,7 +90,7 @@ rule filter_adapters:
         minqual = config['minqual'],
     shell:
         """
-        java -classpath {params.trim_dir} org.usadellab.trimmomatic.TrimmomaticPE \
+        java -classpath {params.trim_dir}/trimmomatic.jar org.usadellab.trimmomatic.TrimmomaticPE \
             -phred33 -threads {threads} -trimlog {log} \
             {input.fwd} {input.rev} \
             {output.fwd} {output.fun} {output.rev} {output.run} \
