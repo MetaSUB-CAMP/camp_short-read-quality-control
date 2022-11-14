@@ -13,9 +13,13 @@ CAMP Short-Read Quality Control
 Overview
 --------
 
-This module is designed to function as both a standalone short-read quality control pipeline as well as a component of the larger CAMP metagenome analysis pipeline. As such, it is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and seamlessly compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
+This module runs a series of standard quality-control steps on metagenomic short read data. It is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
 
 There are two filtration steps in the module- i) for general poor quality (Phred scores, length, Ns, adapters, polyG/X) and ii) for host reads- followed by a sequencing error correction step. The properties of the QC-ed FastQs are summarized in aggregate by a MultiQC report. 
+
+Approach
+--------
+<INSERT PIPELINE IMAGE>
 
 Installation
 ------------
@@ -24,11 +28,9 @@ Installation
 
 2. Set up the conda environment using ``configs/conda/short-read-quality-control.yaml``. 
 
-3. If you don't already have Trimmomatic installed through conda or as a standalone JAR, do the following:
+3. If you don't already have Trimmomatic installed through conda or as a standalone JAR, download its precompiled binary. You'll need to update the path to said binary in the paramters.yaml file.
 ::
     git clone https://github.com/usadellab/Trimmomatic.git
-    cd Trimmomatic/
-    ant
 
 4. Make sure the installed pipeline works correctly. ``pytest`` only generates temporary outputs so no files should be created.
 ::
@@ -41,8 +43,25 @@ Installation
 ::
     wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
 
-Using the Module
-----------------
+Quickstart
+----------
+
+Running each CAMP module takes the same three steps, listed below.
+
+1. As with all CAMP modules, update the parameters.yaml file:
+
+<TABLE OF PARAMETERS AND DESCRIPTIONS>
+
+2. Generate your samples.csv file in the following format:
+
+<SAMPLES.CSV FORMAT>
+
+3. Deploy!
+::
+<SNAKEMAKE COMMAND>
+
+Module input/output/run details
+-------------------------------
 
 **Input**: ``/path/to/samples.csv`` provided by the user.
 
@@ -100,45 +119,10 @@ Using the Module
     - I recommend creating a new directory, which I've called ``/path/to/work/dir/short_read_qc/5_retrimming`` and placing reprocessed reads inside them. 
     - Afterwards, I reran FastQC and MultiQC and collated summary statistics (ex. numbers of reads, etc.) from the reprocessed datasets manually. I also updated the location of the reprocessed reads in ``/path/to/work/dir/short_read_qc/final_reports/samples.csv`` to ``/path/to/work/dir/short_read_qc/5_retrimming``.
 
-Extending the Module
---------------------
 
-We love to see it! This module was partially envisioned as a dependable, prepackaged sandbox for developers to test their shiny new tools in. 
-
-These instructions are meant for developers who have made a tool and want to integrate or demo its functionality as part of a standard short-read-quality-control workflow, or developers who want to integrate an existing short-read-quality-control tool. 
-
-1. Write a module rule that wraps your tool and integrates its input and output into the pipeline. 
-    - This is a great `Snakemake tutorial <https://bluegenes.github.io/hpc-snakemake-tips/>`_ for writing basic Snakemake rules.
-    - If you're adding new tools from an existing YAML, use ``conda env update --file configs/conda/existing.yaml --prune``.
-    - If you're using external scripts and resource files that i) cannot easily be integrated into either `utils.py` or `parameters.yaml`, and ii) are not as large as databases that would justify an externally stored download, add them to ``workflow/ext/`` and use ``rule external_rule`` as a template to wrap them. 
-2. Update the ``make_config`` in ``workflow/Snakefile`` rule to check for your tool's output files. Update ``samples.csv`` to document its output if downstream modules/tools are meant to ingest it. 
-    - If you plan to integrate multiple tools into the module that serve the same purpose but with different input or output requirements (ex. for alignment, Minimap2 for Nanopore reads vs. Bowtie2 for Illumina reads), you can toggle between these different 'streams' by setting the final files expected by ``make_config`` using the example function ``workflow_mode``.
-    - Update the description of the ``samples.csv`` input fields in the CLI script ``workflow/short-read-quality-control.py``. 
-3. If applicable, update the default conda config using ``conda env export > config/conda/short-read-quality-control.yaml`` with your tool and its dependencies. 
-    - If there are dependency conflicts, make a new conda YAML under ``configs/conda`` and specify its usage in specific rules using the ``conda`` option (see ``first_rule`` for an example).
-4. Add your tool's installation and running instructions to the module documentation and (if applicable) add the repo to your `Read the Docs account <https://readthedocs.org/>`_ + turn on the Read the Docs service hook.
-5. Run the pipeline once through to make sure everything works using the test data in ``test_data/`` if appropriate, or your own appropriately-sized test data. Then, generate unit tests to ensure that others can sanity-check their installations.
-    * Note: Python functions imported from ``utils.py`` into ``Snakefile`` should be debugged on the command-line first before being added to a rule because Snakemake doesn't port standard output/error well when using ``run:``.
-::
-    python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py --unit_test \
-        -d /path/to/work/dir \
-        -s /path/to/samples.csv
-
-6. Increment the version number of the modular pipeline.
-::
-    bump2version --allow-dirty --commit --tag major workflow/__init__.py \
-                 --current-version A.C.E --new-version B.D.F
-
-7. If you want your tool integrated into the main CAMP pipeline, send a pull request and we'll have a look at it ASAP! 
-    - Please make it clear what your tool intends to do by including a summary in the commit/pull request (ex. "Release X.Y.Z: Integration of tool A, which does B to C and outputs D").
-
-.. ..
-
- <!--- 
- Bugs
- ----
- Put known ongoing problems here
- --->
+Dependencies
+------------
+<LIST ALL DEPENDENCIES>
 
 Credits
 -------
