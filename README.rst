@@ -75,6 +75,7 @@ Using the Module
     - Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
 ::
     python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py \
+        (-c number_of_cores_allocated) \
         -d /path/to/work/dir \
         -s /path/to/samples.csv
 * Note: This setup allows the main Snakefile to live outside of the work directory.
