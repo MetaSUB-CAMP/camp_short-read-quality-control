@@ -20,20 +20,20 @@ Installation
 
 3. If you don't already have Trimmomatic installed through conda or as a standalone JAR, download its precompiled binary. You'll need to update the path to said binary in the paramters.yaml file.
 ```
-    git clone https://github.com/usadellab/Trimmomatic.git
+git clone https://github.com/usadellab/Trimmomatic.git
 ```
 4. Make sure the installed pipeline works correctly. ``pytest`` only generates temporary outputs so no files should be created.
 ```
-    cd camp_short-read-quality-control
-    conda env create -f configs/conda/short-read-quality-control.yaml
-    conda activate short-read-quality-control
-    pytest .tests/unit/
+cd camp_short-read-quality-control
+conda env create -f configs/conda/short-read-quality-control.yaml
+conda activate short-read-quality-control
+pytest .tests/unit/
 ```    
       
 5. Download and untar the relevant databases -- make sure to update the path to these files in the ``parameters.yaml``
 
 ```
-        wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
+wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
 ```
 
 Quickstart
@@ -69,11 +69,11 @@ Module details
 
 **Structure**:
 ```
-    └── workflow
-        ├── Snakefile
-        ├── short-read-quality-control.py
-        ├── utils.py
-        └── __init__.py
+└── workflow
+    ├── Snakefile
+    ├── short-read-quality-control.py
+    ├── utils.py
+    └── __init__.py
 ```
 - ``workflow/short-read-quality-control.py``: Click-based CLI that wraps the ``snakemake`` and unit test generation commands for clean management of parameters, resources, and environment variables.
 - ``workflow/Snakefile``: The ``snakemake`` pipeline. 
