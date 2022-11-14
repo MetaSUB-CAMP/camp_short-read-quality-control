@@ -5,7 +5,7 @@ from contextlib import redirect_stderr
 import os
 from os.path import basename, join
 import pandas as pd
-from shutil
+import shutil
 from utils import Workflow_Dirs, ingest_samples, calc_read_lens, sample_statistics
 
 
