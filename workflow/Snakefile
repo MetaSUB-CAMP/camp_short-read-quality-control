@@ -87,14 +87,16 @@ rule filter_adapters:
         mem_mb = config['filter_adapters_mem_mb'],
     params:
         trim_dir = config['trimmomatic_dir'],
+        trim_exec = config['trimmomatic_exec'],
+        trim_adapters = config['adapters'],
         minqual = config['minqual'],
     shell:
         """
-        java -classpath {params.trim_dir}/trimmomatic.jar org.usadellab.trimmomatic.TrimmomaticPE \
+        java -classpath {params.trim_exec} org.usadellab.trimmomatic.TrimmomaticPE \
             -phred33 -threads {threads} -trimlog {log} \
             {input.fwd} {input.rev} \
             {output.fwd} {output.fun} {output.rev} {output.run} \
-            ILLUMINACLIP:{params.trim_dir}/adapters/TruSeq3-PE-2.fa:2:{params.minqual}:10:3:true
+            ILLUMINACLIP:{params.trim_adapters}:2:{params.minqual}:10:3:true
         """
     
 
