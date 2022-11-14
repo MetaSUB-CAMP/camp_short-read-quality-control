@@ -86,11 +86,11 @@ rule filter_adapters:
     resources:
         mem_mb = config['filter_adapters_mem_mb'],
     params:
-        trim_dir = config['trimmomatic_exec'],
+        trim_dir = config['trimmomatic_dir'],
         minqual = config['minqual'],
     shell:
         """
-        java -classpath {params.trimmomatic_exec} org.usadellab.trimmomatic.TrimmomaticPE \
+        java -classpath {params.trim_dir} org.usadellab.trimmomatic.TrimmomaticPE \
             -phred33 -threads {threads} -trimlog {log} \
             {input.fwd} {input.rev} \
             {output.fwd} {output.fun} {output.rev} {output.run} \
