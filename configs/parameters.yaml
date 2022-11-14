@@ -14,6 +14,8 @@ dedup:      False
 # --- filter_adapters --- #
 
 trimmomatic_dir: /home/btierney/bin/Trimmomatic-0.39/
+trimmomatic_exec: /home/btierney/bin/Trimmomatic-0.39/
+adapters: /home/btierney/bin/Trimmomatic-0.39/
 
 # --- filter_host_reads --- #
 
