@@ -13,7 +13,7 @@ dedup:      False
 
 # --- filter_adapters --- #
 
-trimmomatic_exec: /home/btierney/bin/Trimmomatic-0.39/lib/jbzip2-0.9.jar
+trimmomatic_dir: /home/btierney/bin/Trimmomatic-0.39/
 
 # --- filter_host_reads --- #
 
