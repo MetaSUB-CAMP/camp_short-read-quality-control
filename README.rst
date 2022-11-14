@@ -36,6 +36,10 @@ Installation
     conda env create -f configs/conda/short-read-quality-control.yaml
     conda activate short-read-quality-control
     pytest .tests/unit/
+    
+5. Download and untar the relevant databases -- make sure to update the path to these files in the ``parameters.yaml``
+::
+    wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
 
 Using the Module
 ----------------
