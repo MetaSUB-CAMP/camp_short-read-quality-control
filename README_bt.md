@@ -1,14 +1,4 @@
-============
-CAMP Short-Read Quality Control
-============
-
-
-.. image:: https://readthedocs.org/projects/camp-short-read-quality-control/badge/?version=latest
-        :target: https://camp-short-read-quality-control.readthedocs.io/en/latest/?version=latest
-        :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/version-0.1.0-brightgreen
-
+# CAMP: Short-Read Quality Control
 
 Overview
 --------
@@ -29,19 +19,22 @@ Installation
 2. Set up the conda environment using ``configs/conda/short-read-quality-control.yaml``. 
 
 3. If you don't already have Trimmomatic installed through conda or as a standalone JAR, download its precompiled binary. You'll need to update the path to said binary in the paramters.yaml file.
-::
+```
     git clone https://github.com/usadellab/Trimmomatic.git
-
+```
 4. Make sure the installed pipeline works correctly. ``pytest`` only generates temporary outputs so no files should be created.
-::
+```
     cd camp_short-read-quality-control
     conda env create -f configs/conda/short-read-quality-control.yaml
     conda activate short-read-quality-control
     pytest .tests/unit/
-    
+```    
+      
 5. Download and untar the relevant databases -- make sure to update the path to these files in the ``parameters.yaml``
-::
-    wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
+
+```
+        wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
+```
 
 Quickstart
 ----------
@@ -75,12 +68,13 @@ Module details
 
 
 **Structure**:
-::
+```
     └── workflow
         ├── Snakefile
         ├── short-read-quality-control.py
         ├── utils.py
         └── __init__.py
+```
 - ``workflow/short-read-quality-control.py``: Click-based CLI that wraps the ``snakemake`` and unit test generation commands for clean management of parameters, resources, and environment variables.
 - ``workflow/Snakefile``: The ``snakemake`` pipeline. 
 - ``workflow/utils.py``: Sample ingestion and work directory setup functions, and other utility functions used in the pipeline and the CLI.
@@ -98,10 +92,10 @@ Command line deployment
 To run CAMP on the command line, use the following, where ``/path/to/work/dir`` is replaced with the absolute path of your chosen working directory, and ``/path/to/samples.csv`` is replaced with your copy of ``samples.csv``. 
     - The default number of cores available to Snakemake is 1 which is enough for test data, but should probably be adjusted to 10+ for a real dataset.
     - Relative or absolute paths to the Snakefile and/or the working directory (if you're running elsewhere) are accepted!
-::
-    python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py \
-        -d /path/to/work/dir \
-        -s /path/to/samples.csv
+```
+python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py -d /path/to/work/dir -s /path/to/samples.csv
+```
+
 * Note: This setup allows the main Snakefile to live outside of the work directory.
 
 Running on a slurm cluster
@@ -109,7 +103,7 @@ Running on a slurm cluster
 To run CAMP on a job submission cluster (for now, only Slurm is supported), use the following.
     - ``--slurm`` is an optional flag that submits all rules in the Snakemake pipeline as ``sbatch`` jobs. 
     - In Slurm mode, the ``-c`` flag refers to the maximum number of ``sbatch`` jobs submitted in parallel, **not** the pool of cores available to run the jobs. Each job will request the number of cores specified by threads in ``configs/resources/slurm.yaml``.
-::
+```
     sbatch -J jobname -o jobname.log << "EOF"
     #!/bin/bash
     python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py --slurm \
@@ -117,7 +111,7 @@ To run CAMP on a job submission cluster (for now, only Slurm is supported), use 
         -d /path/to/work/dir \
         -s /path/to/samples.csv
     EOF
-
+```
 Quality-checking processed FastQs
 ----------------------------------
 
