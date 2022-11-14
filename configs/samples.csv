@@ -1,2 +1,2 @@
 ,illumina_fwd,illumina_rev
-gut,/athena/masonlab/scratch/users/btt4001/camp_dev/camp_short-read-quality-control/test_data/gut_1.fastq,/athena/masonlab/scratch/users/btt4001/camp_dev/camp_short-read-quality-control/test_data/gut_2.fastq
+zymo,./test_data/zymo_pos_cntrl.r1.fq.gz,./test_data/zymo_pos_cntrl.r2.fq.gz
