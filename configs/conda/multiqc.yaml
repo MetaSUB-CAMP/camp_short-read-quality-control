@@ -56,7 +56,7 @@ dependencies:
   - numpy=1.19.5=py36hfc0c790_2
   - olefile=0.46=pyh9f0ad1d_1
   - openjdk=8.0.152=h7b6447c_3
-   - openjpeg=2.4.0=hb52868f_1
+  - openjpeg=2.4.0=hb52868f_1
   - openssl=1.1.1s=h7f8727e_0
   - pandas=1.1.5=py36h284efc9_0
   - perl=5.34.0=h5eee18b_2
