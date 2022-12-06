@@ -27,7 +27,6 @@ git clone https://github.com/usadellab/Trimmomatic.git
 cd camp_short-read-quality-control
 conda env create -f configs/conda/short-read-quality-control.yaml
 conda activate short-read-quality-control
-pytest .tests/unit/
 ```    
       
 5. Download and untar the relevant databases -- make sure to update the path to these files in the ``parameters.yaml``
