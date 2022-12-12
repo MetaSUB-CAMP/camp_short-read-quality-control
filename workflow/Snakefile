@@ -33,11 +33,11 @@ rule all:
 
 def workflow_mode(wildcards):
     if config['use_host_filter']:
-        return { 'fwd' : join(dirs.OUT, '2_host_removal', '{sample}_1.fastq.gz'),
-                 'rev' : join(dirs.OUT, '2_host_removal', '{sample}_2.fastq.gz')}
+        return [ join(dirs.OUT, '2_host_removal', '{sample}_1.fastq.gz'),
+                 join(dirs.OUT, '2_host_removal', '{sample}_2.fastq.gz') ]
     else:
-        return { 'fwd' : join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
-                 'rev' : join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz')}
+        return [ join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
+                 join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz') ]
 
 
 # --- Workflow modules --- #
@@ -140,7 +140,7 @@ rule filter_seq_errors:
         """
         spades.py --only-error-correction --meta \
             -t {threads} -m {resources.mem_mb} \
-            -1 {input.fwd} -2 {input.rev} -o {params.out_dir} > {log} 2>&1
+            -1 {input[0]} -2 {input[1]} -o {params.out_dir} > {log} 2>&1
         """
 
 

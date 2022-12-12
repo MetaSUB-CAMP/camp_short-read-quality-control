@@ -23,6 +23,11 @@ def ingest_samples(samples, tmp):
     return s
 
 
+def check_make(d):
+    if not exists(d):
+        makedirs(d)
+
+
 class Workflow_Dirs:
     """Management of the working directory tree."""
     OUT = ''
@@ -33,22 +38,15 @@ class Workflow_Dirs:
         self.OUT = join(work_dir, module)
         self.TMP = join(work_dir, 'tmp') 
         self.LOG = join(work_dir, 'logs') 
-        if not exists(self.OUT):
-            makedirs(self.OUT)
-            makedirs(join(self.OUT, '0_lowqual_removal'))
-            makedirs(join(self.OUT, '1_adapter_removal'))
-            makedirs(join(self.OUT, '2_host_removal'))
-            makedirs(join(self.OUT, '3_error_removal'))
-            makedirs(join(self.OUT, '4_summary'))
-            makedirs(join(self.OUT, 'final_reports'))
-        if not exists(self.TMP):
-            makedirs(self.TMP)
-        if not exists(self.LOG):
-            makedirs(self.LOG)
-            makedirs(join(self.LOG, 'lowqual_removal'))
-            makedirs(join(self.LOG, 'adapter_removal'))            
-            makedirs(join(self.LOG, 'host_removal'))
-            makedirs(join(self.LOG, 'error_removal'))
+        check_make(self.OUT)
+        out_dirs = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal', '4_summary', 'final_reports']
+        for d in out_dirs: 
+            check_make(join(self.OUT, d))
+        check_make(self.TMP)
+        check_make(self.LOG)
+        log_dirs = ['lowqual_removal', 'adapter_removal', 'host_removal', 'error_removal']
+        for d in log_dirs: 
+            check_make(join(self.LOG, d))
 
 
 def print_cmds(log):
@@ -86,15 +84,12 @@ def cleanup_files(work_dir, df):
 
 def calc_read_lens(sp, st, fqs, fo): # A list of FastQ files
     # Extract read sequences and their lengths
-    seqs = []
+    seq_lens = []
     for fq in fqs:
-        f = gzip.open(fq, 'rt') if 'gz' in fq else open(fq, 'r')
-        lines = f.readlines()
-        f.close()
-        for i,l in enumerate(lines):
-            if i % 4 == 1:
-                seqs.append(l.strip())
-    seq_lens = [len(s) for s in seqs]
+        with gzip.open(fq, 'rt') if 'gz' in fq else open(fq, 'r') as f:
+            for i,l in enumerate(f):
+                if i % 4 == 1:
+                    seq_lens.append(len(l.strip()))
     line = "%s,%s,%d,%d,%.2f" % (sp, st, len(seq_lens), sum(seq_lens), float(sum(seq_lens)/len(seq_lens)))
     with open(fo, 'w') as f_out:
         f_out.write(line + '\n')

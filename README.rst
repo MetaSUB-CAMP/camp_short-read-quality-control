@@ -97,6 +97,23 @@ Using the Module
     - I recommend creating a new directory, which I've called ``/path/to/work/dir/short_read_qc/5_retrimming`` and placing reprocessed reads inside them. 
     - Afterwards, I reran FastQC and MultiQC and collated summary statistics (ex. numbers of reads, etc.) from the reprocessed datasets manually. I also updated the location of the reprocessed reads in ``/path/to/work/dir/short_read_qc/final_reports/samples.csv`` to ``/path/to/work/dir/short_read_qc/5_retrimming``.
 
+7. If for some reason the module keeps failing, CAMP can print a script containing all of the remaining commands that can be run manually. 
+::
+
+    python3 /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py \
+        --dry_run \
+        -d /path/to/work/dir \
+        -s /path/to/samples.csv > cmds.txt
+    python3 /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py \
+        commands cmds.txt
+
+8. To plot grouped bar graph(s) of the number of reads and bases remaining after each quality control step in each sample, set up the dataviz environment and follow the instructions in the Jupyter notebook:
+::
+    conda env create -f configs/conda/dataviz.yaml
+    conda activate dataviz
+    jupyter notebook &
+
+
 Extending the Module
 --------------------
 

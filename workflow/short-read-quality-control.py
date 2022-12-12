@@ -68,6 +68,10 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
     help = 'Absolute path to working directory')
 @click.option('-s', '--samples', type = click.Path(), required = True, \
     help = 'Sample CSV in format [sample_name,...,]')
+@click.option('-p', '--parameters', type = click.Path(), required = False, \
+    help = 'Absolute path to parameters YAML file')
+@click.option('-r', '--resources', type = click.Path(), required = False, \
+    help = 'Absolute path to computational resources YAML file')
 @click.option('--unit_test', is_flag = True, default = False, \
     help = 'Generate unit tests using Snakemake API')
 @click.option('--slurm', is_flag = True, default = False, \
@@ -76,14 +80,14 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
     help = 'Set up directory structure and print workflow commands to be run separately')
 @click.option('--unlock', is_flag = True, default = False, \
     help = 'Remove a lock on the work directory')
-def run(cores, work_dir, samples, unit_test, slurm, dry_run, unlock): 
+def run(cores, work_dir, samples, parameters, resources, unit_test, slurm, dry_run, unlock):
     # Get the absolute path of the Snakefile to find the profile configs
     main_dir = dirname(dirname(abspath(__file__))) # /path/to/main_dir/workflow/cli.py
     workflow = join(main_dir, 'workflow', 'Snakefile')
 
     # Set location of rule (and program) parameters and resources
-    pyaml = join(main_dir, 'configs', 'parameters.yaml')
-    ryaml = join(main_dir, 'configs', 'resources.yaml')
+    pyaml = parameters if parameters else join(main_dir, 'configs', 'parameters.yaml')
+    ryaml = resources if resources else join(main_dir, 'configs', 'resources.yaml')
 
     # Set up the conda environment directory
     env_dir = join(main_dir, 'conda_envs')

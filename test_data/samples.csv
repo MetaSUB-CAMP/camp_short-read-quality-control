@@ -1,0 +1,2 @@
+sample_name,illumina_fwd,illumina_rev
+zymo_pos_ctrl,/home/lam4003/bin/camp_short-read-quality-control/test_data/zymo_pos_cntrl.r1.fq.gz,/home/lam4003/bin/camp_short-read-quality-control/test_data/zymo_pos_cntrl.r2.fq.gz
