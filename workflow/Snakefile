@@ -175,9 +175,10 @@ rule fastqc_pre:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_pre'),
+        temp_dir = dirs.OUT,
     shell:
         """
-        fastqc {input} --outdir {params.out_dir}
+        fastqc {input} -d {params.temp_dir} --outdir {params.out_dir}
         """
 
 
