@@ -181,4 +181,3 @@ dependencies:
   - zstd=1.5.2=hcb37349_0
   - pip:
     - pyqt5-sip==12.11.0
-prefix: /Users/laurenmak/opt/miniconda3/envs/dataviz
