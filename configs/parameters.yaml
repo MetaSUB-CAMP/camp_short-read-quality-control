@@ -13,9 +13,13 @@ dedup:      False
 
 # --- filter_adapters --- #
 
-trimmomatic_dir: /home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2
+trimmomatic_dir: '/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2'
+trimmomatic_exec: '/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/trimmomatic'
+adapters: '/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters'
+
 
 # --- filter_host_reads --- #
 
-use_host_filter:         True
-host_reference_database: /athena/masonlab/scratch/databases/metagenomics/HG37_Index/hg37dec_v0.1
+use_host_filter:         False
+# host_reference_database: '/athena/masonlab/scratch/databases/metagenomics/HG37_Index/hg37dec_v0.1'
+host_reference_database: '/homes064/chf4012/camp_short-read-quality-control/test_data/GRCh38_noalt_as'

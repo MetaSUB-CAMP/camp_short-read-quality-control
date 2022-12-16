@@ -52,7 +52,6 @@ dependencies:
   - matplotlib-base=3.3.4=py36hd391965_0
   - multiqc=1.13=pyhdfd78af_0
   - ncurses=6.3=h27087fc_1
-  - networkx=2.7.1=pyhd8ed1ab_0
   - numpy=1.19.5=py36hfc0c790_2
   - olefile=0.46=pyh9f0ad1d_1
   - openjdk=8.0.152=h7b6447c_3
@@ -88,3 +87,5 @@ dependencies:
   - zipp=3.6.0=pyhd8ed1ab_0
   - zlib=1.2.12=h166bdaf_2
   - zstd=1.5.2=h6239696_4
+  - pip:
+    - networkx
