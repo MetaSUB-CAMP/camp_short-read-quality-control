@@ -1,20 +1,30 @@
 # CAMP: Short-Read Quality Control
 
-Overview
+## Overview
 --------
 
 This module runs a series of standard quality-control steps on metagenomic short read data. It is both self-contained (ex. instructions included for the setup of a versioned environment, etc.), and compatible with other CAMP modules (ex. ingests and spawns standardized input/output config files, etc.). 
 
 There are two filtration steps in the module- i) for general poor quality (Phred scores, length, Ns, adapters, polyG/X) and ii) for host reads- followed by a sequencing error correction step. The properties of the QC-ed FastQs are summarized in aggregate by a MultiQC report. 
 
-Approach
+## Approach
 --------
 <INSERT PIPELINE IMAGE>
 
-Installation
+## Installation
 ------------
 
-1. Clone repo from `Github tutorial <https://github.com/MetaSUB-CAMP/camp_short-read-quality-control>`_.
+1. Clone the repository to your local machine or ssh server:
+
+```
+git clone https://github.com/MetaSUB-CAMP/camp_short-read-quality-control.git
+```
+
+or
+
+```
+git clone git@github.com:MetaSUB-CAMP/camp_short-read-quality-control.git
+```
 
 2. Set up the conda environment using ``configs/conda/short-read-quality-control.yaml``. 
 
@@ -22,7 +32,9 @@ Installation
 ```
 git clone https://github.com/usadellab/Trimmomatic.git
 ```
+
 4. Make sure the installed pipeline works correctly. ``pytest`` only generates temporary outputs so no files should be created.
+
 ```
 cd camp_short-read-quality-control
 conda env create -f configs/conda/short-read-quality-control.yaml
@@ -31,9 +43,15 @@ conda activate short-read-quality-control
       
 5. Download and untar the relevant databases -- make sure to update the path to these files in the ``parameters.yaml``
 
+For example,
 ```
 wget https://s3.us-east-1.wasabisys.com/camp-databases/v0.1.1/human_genome_bt2idx/GRCh38_noalt_as.tar.gz; tar -zxvf GRCh38_noalt_as.tar.gz
 ```
+
+6. Environment set up: snakemake pipelines require that users define file paths as variables as inputs to the pipeline. For our pipeline, one can define these variables in `configs/parameters.yaml` and `configs/resources.yaml`. Examples for setting up these two files can be found in the `test_data` folder.
+- `configs/parameters.yaml` include inputs required for running certain modules in the pipeline:
+    - After step 3, you should be able to identify the filepath to the installed Trimmomatic package. You should revise the `trimmomatic_dir` to that general directory, `trimmomatic_exec` to the path to the executable inside the Trimmomatic directory, usually ending with `.jar`, and `adapters` should be defined by the path to the adapters folder in the Trimmomatic directory.
+- `configs/resources.yaml` include inputs required for the computing resource you plan to allocate to running each part of the pipeline.
 
 Quickstart
 ----------
