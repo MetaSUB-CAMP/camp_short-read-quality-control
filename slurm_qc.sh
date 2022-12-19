@@ -1,14 +1,14 @@
 #! /bin/bash -l
  
-#SBATCH --partition=panda   # cluster-specific
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --partition=panda_physbio
 #SBATCH --job-name=slurm_qc
-#SBATCH --time=01:00:00   # HH/MM/SS
-#SBATCH --mem=5G   # memory requested, units available: K,M,G,T
+#SBATCH --time=24:00:00
+#SBATCH --mem=100G   # memory requested, units available: K,M,G,T
+#SBATCH --cpus-per-task=8
 #SBATCH --output slurm_qc-%j.out
 #SBATCH --error slurm_qc-%j.err
- 
+
+
 source ~/.bashrc
 mamba activate short-read-quality-control
 echo "This is job #:" $SLURM_JOB_ID >> slurm_qc_output.txt

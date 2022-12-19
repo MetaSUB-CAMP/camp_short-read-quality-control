@@ -13,11 +13,12 @@ dedup:      False
 
 # --- filter_adapters --- #
 
-trim_exec: ''
-trim_adapters: ''
+trimmomatic_dir: ''
+trimmomatic_exec: ''
+adapters: ''
 
 
 # --- filter_host_reads --- #
 
-use_host_filter:         True
+use_host_filter:         False
 host_reference_database: ''

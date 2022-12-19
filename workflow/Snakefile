@@ -178,7 +178,7 @@ rule fastqc_pre:
         temp_dir = dirs.OUT,
     shell:
         """
-        fastqc {input} -d {params.temp_dir} --outdir {params.out_dir}
+        fastqc {input} -d {params.temp_dir} --outdir {params.out_dir} -t 50
         """
 
 
