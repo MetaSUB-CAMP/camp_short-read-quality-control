@@ -86,8 +86,8 @@ rule filter_adapters:
     resources:
         mem_mb = config['filter_adapters_mem_mb'],
     params:
-        trim_exec = config['trimmomatic_exec'],
-        trim_adapters = config['adapters'],
+        trim_exec = config['trim_exec'],
+        trim_adapters = config['trim_adapters'],
         minqual = config['minqual'],
     shell:
         """
@@ -177,7 +177,7 @@ rule fastqc_pre:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_pre'),
     shell:
         """
-        fastqc {input} --outdir {params.out_dir}
+        fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
 
 
@@ -192,7 +192,7 @@ rule fastqc_post:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_post'),
     shell:
         """
-        fastqc {input} --outdir {params.out_dir}
+        fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
 
 
