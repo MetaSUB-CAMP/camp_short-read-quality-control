@@ -22,3 +22,8 @@ adapters: '/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters/TruSeq3
 
 use_host_filter:         False
 host_reference_database: '/athena/masonlab/scratch/databases/metagenomics/HG37_Index/hg37dec_v0.1'
+
+
+# --- filter_seq_errors --- #
+
+error_correct_option: 'tadpole'
