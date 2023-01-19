@@ -86,8 +86,8 @@ rule filter_adapters:
     resources:
         mem_mb = config['filter_adapters_mem_mb'],
     params:
-        trim_exec = config['trimmomatic_exec'],
-        trim_adapters = config['adapters'],
+        trim_exec = config['trim_exec'],
+        trim_adapters = config['trim_adapters'],
         minqual = config['minqual'],
     shell:
         """
