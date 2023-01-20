@@ -70,35 +70,34 @@ rule filter_low_qual:
             -h {params.out_dir}/{params.sample}.html > {log} 2>&1
         """
 
-
+# fastp -i 306557045_S155_L003_R1_001.fastq.gz -I 306557045_S155_L003_R2_001.fastq.gz -o low_qual_306557045_S155_L003_R1_001.fastq.gz -O low_qual_306557045_S155_L003_R2_001.fastq.gz -q 30 False --thread 24 
+# /usr/bin/time -v fastp -i 306555939_S142_L003_R1_001.fastq.gz -I 306555939_S142_L003_R2_001.fastq.gz -o low_qual_306555939_S142_L003_R1_001.fastq.gz -O low_qual_306555939_S142_L003_R2_001.fastq.gz -q 30 False --thread 16
 rule filter_adapters:
     input:
         fwd = join(dirs.OUT, '0_lowqual_removal', '{sample}_1.fastq.gz'),
         rev = join(dirs.OUT, '0_lowqual_removal', '{sample}_2.fastq.gz'),
     output:
-        fwd = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
-        rev = join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz'),
-        fun = join(dirs.OUT, '1_adapter_removal', '{sample}_1_unp.fastq.gz'),
-        run = join(dirs.OUT, '1_adapter_removal', '{sample}_2_unp.fastq.gz'),
-    log:
-        join(dirs.LOG, 'adapter_removal', '{sample}.out'),
+        fwd  = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
+        rev  = join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz'),
     threads: config['filter_adapters_threads'],
-    resources:
-        mem_mb = config['filter_adapters_mem_mb'],
     params:
-        trim_exec = config['trimmomatic_exec'],
-        trim_adapters = config['adapters'],
-        minqual = config['minqual'],
+        outbase = join(dirs.OUT, '1_adapter_removal', '{sample}'),
     shell:
         """
-        java -classpath {params.trim_exec} org.usadellab.trimmomatic.TrimmomaticPE \
-            -phred33 -threads {threads} -trimlog {log} \
-            {input.fwd} {input.rev} \
-            {output.fwd} {output.fun} {output.rev} {output.run} \
-            ILLUMINACLIP:{params.trim_adapters}:2:{params.minqual}:10:3:true
+        AdapterRemoval --threads {threads} --file1 {input.fwd} --file2 {input.rev} \
+        --output1 {output.fwd} --output2 {output.rev} --trimns --trimqualities --gzip
         """
-    
 
+# /usr/bin/time -v java -classpath /home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/trimmomatic.jar org.usadellab.trimmomatic.TrimmomaticPE -phred33 -threads 2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306555939_S142_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306555939_S142_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R1_001_unp.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R2_001_unp.fastq.gz ILLUMINACLIP:/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters/TruSeq3-PE-2.fa:2:30:10:3:true
+
+# /usr/bin/time -v java -classpath /home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/trimmomatic.jar org.usadellab.trimmomatic.TrimmomaticPE -phred33 -threads 12 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R1_001_unp.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R1_001_unp.fastq.gz ILLUMINACLIP:/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters/TruSeq3-PE-2.fa:2:30:10:3:true
+
+# # cutadapt
+# /usr/bin/time -v cutadapt -a ADAPTER_FWD -A ADAPTER_REV --cores=16 -o /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/cutadapt_306557045_S155_L003_R1_001.fastq.gz -p /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/cutadapt_306557045_S155_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz
+
+# # AdapterRemoval
+# /usr/bin/time -v AdapterRemoval --threads 16 --file1 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz --file2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz --basename /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/AAAdapterRemoval_306557045_S155_L003_RX_001 --trimns --trimqualities --collapse  --gzip
+# /usr/bin/time -v AdapterRemoval --threads 16 --file1 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz --file2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz --output1 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/AAAdapterRemoval_306557045_S155_L003_R1_001.fastq.gz --output2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/AAAdapterRemoval_306557045_S155_L003_R2_001.fastq.gz --trimns --trimqualities --gzip
 rule filter_host_reads:
     input:
         fwd = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
@@ -137,14 +136,28 @@ rule filter_seq_errors:
     params:
         prefix = join(dirs.OUT, '3_error_removal', '{sample}', 'corrected', '{sample}'),
         out_dir = join(dirs.OUT, '3_error_removal', '{sample}', ),
+        fwd_repair = join(dirs.OUT, '3_error_removal', '{sample}_repaired_1.fastq.00.0_0.cor.fastq.gz'),
+        rev_repair = join(dirs.OUT, '3_error_removal', '{sample}_repaired_2.fastq.00.0_0.cor.fastq.gz'),
         fwd_tadpole = join(dirs.OUT, '3_error_removal', '{sample}_1.fastq.00.0_0.cor.fastq.gz'),
         rev_tadpole = join(dirs.OUT, '3_error_removal', '{sample}_2.fastq.00.0_0.cor.fastq.gz'),
     run:
         if config['error_correct_option'] == 'spades':
             shell("spades.py --only-error-correction --meta -t {threads} -m {resources.mem_mb} -1 {input[0]} -2 {input[1]} -o {params.out_dir} > {log} 2>&1")
         elif config['error_correct_option'] == 'tadpole':
-            shell("./configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={param.fwd_tadpole} out2={param.rev_tadpole} > {log} 2>&1")
+        # to add repair
+            shell("/home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/repair.sh in={input[0]} in2={input[1]} out={params.fwd_repair} out2={params.rev_repair} && /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={params.fwd_repair} in2={params.rev_repair} out={output.fwd} out2={output.rev}")
+            # shell("/home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={params.fwd_tadpole} out2={params.rev_tadpole}")
+            # shell("/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={param.fwd_tadpole} out2={param.rev_tadpole} > {log} 2>&1")
             print("tadpole run on", '{sample}_1.fastq.00.0_0.cor.fastq.gz')
+
+
+
+# || /configs/tadpole/bbmap/repair.sh in={input[0]} in2={input[1]} out={params.fwd_repair} out2={params.rev_repair} && /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={params.fwd_repair} in2={params.rev_repair} out={params.fwd_tadpole} out2={params.rev_tadpole} > {log} 2>&1
+# /usr/bin/time -v /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/repair.sh  t=16 in=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R1_001.fastq.gz in2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R2_001.fastq.gz out=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R1_001.fastq.gz out2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R2_001.fastq.gz
+# /usr/bin/time -v /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t=16 in=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R1_001.fastq.gz in2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R1_001.fastq.gz out=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306555939_S142_L003_R1_001.fastq.gz out2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306555939_S142_L003_R2_001.fastq.gz
+
+
+# /usr/bin/time -v /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t=16 in=AdapterRemoval_306557045_S155_L003_RX_001.pair1.truncated.fastq in2=AdapterRemoval_306557045_S155_L003_RX_001.pair2.truncated.fastq out=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306557045_S155_L003_R1_001.fastq.gz out2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306557045_S155_L003_R2_001.fastq.gz
 
 
 # So that FastQs generated in the previous step will not get deleted
@@ -183,7 +196,7 @@ rule fastqc_pre:
         fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
 
-
+# /usr/bin/time -v fastqc 306557045_S155_L003_R1_001.fastq.gz -d /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_pre --outdir /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_pre
 rule fastqc_post:
     input:
         join(dirs.OUT, '3_error_removal', '{sample}_{dir}.fastq.gz'),
@@ -198,7 +211,7 @@ rule fastqc_post:
         fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
 
-
+# /usr/bin/time -v fastqc /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306557045_S155_L003_R1_001.fastq.gz -d /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_post --outdir /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_post
 rule multiqc:
     input:
         lambda wildcards: expand(join(dirs.OUT, '4_summary', 'fastqc_{eval}', '{sample}_{dir}_fastqc.html'), eval = wildcards.eval, sample = SAMPLES, dir = ['1', '2']),
