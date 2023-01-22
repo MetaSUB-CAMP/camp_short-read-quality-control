@@ -8,6 +8,7 @@ import pandas as pd
 import shutil
 from utils import Workflow_Dirs, ingest_samples, calc_read_lens, sample_statistics
 
+from itertools import product
 
 # Load and/or make the working directory structure
 dirs = Workflow_Dirs(config['work_dir'], 'short_read_qc')
@@ -23,12 +24,28 @@ dedup_flag = '--dedup' if config['dedup'] else '--dont_eval_duplication'
 
 # --- Workflow output --- #
 
+all_results = [join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        join(dirs.OUT, 'final_reports', 'samples.csv')]
+if config['qc_option']:
+    all_results.extend([join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'), join(dirs.OUT, 'final_reports', 'post_multiqc_report.html')])
+else:
+    print("Here we are printing!")
+
+print(all_results)
+
+
+if not config['qc_option']:
+    with open(join(dirs.OUT, '4_summary', 'pre_multiqc_report.html'), 'w') as fp:
+        pass
+    with open(join(dirs.OUT, '4_summary', 'post_multiqc_report.html'), 'w') as fp:
+        pass
 
 rule all:
     input:
-        expand(join(dirs.OUT, 'final_reports', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
-        join(dirs.OUT, 'final_reports', 'read_stats.csv'),
-        join(dirs.OUT, 'final_reports', 'samples.csv')
+        # expand(join(dirs.OUT, 'final_reports', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
+        # join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        # join(dirs.OUT, 'final_reports', 'samples.csv')
+        all_results
 
 
 def workflow_mode(wildcards):
@@ -113,13 +130,13 @@ rule filter_host_reads:
     params:
         prefix = join(dirs.OUT, '2_host_removal', '{sample}'),
         host_ref_db = config['host_reference_database'],
-    shell:
-        """
-        bowtie2 --very-sensitive --threads {threads} -x {params.host_ref_db} \
-            -1 {input.fwd} -2 {input.rev} --un-conc-gz {params.prefix}_%.fastq.gz \
-            > {params.prefix}.sam 2> {log}
-        rm {params.prefix}.sam
-        """
+    run:
+        if config['use_host_filter']:
+            shell("bowtie2 --very-sensitive --threads {threads} -x {params.host_ref_db} -1 {input.fwd} -2 {input.rev} --un-conc-gz {params.prefix}_%.fastq.gz > {params.prefix}.sam 2> {log} rm {params.prefix}.sam")
+        else:
+            shell("touch {output.fwd} && touch {output.rev}")
+            print("empty host cleaning files created: {output.fwd} & {output.rev}")
+
 
 
 rule filter_seq_errors:
@@ -191,6 +208,11 @@ rule fastqc_pre:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_pre'),
+    # run:
+    #     if config['qc_option']:
+    #         shell("fastqc {input} -d {params.out_dir} --outdir {params.out_dir}")
+    #     else:
+    #         shell("touch {output}")
     shell:
         """
         fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
@@ -207,6 +229,11 @@ rule fastqc_post:
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_post'),
     shell:
+    # run:
+    #     if config['qc_option']:
+    #         shell("fastqc {input} -d {params.out_dir} --outdir {params.out_dir}")
+    #     else:
+    #         shell("touch {output}")
         """
         fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
@@ -222,6 +249,11 @@ rule multiqc:
     params:
         in_dir = join(dirs.OUT, '4_summary', 'fastqc_{eval}'),
     shell:
+    # run:
+    #     if config['qc_option']:
+    #         shell("multiqc --force {params.in_dir} -n {output}")
+    #     else:
+    #         shell("touch {output}")
         """
         multiqc --force {params.in_dir} -n {output}
         """
@@ -254,11 +286,15 @@ rule step_statistics:
     run:
         calc_read_lens(str(params.sample), str(params.step), input, str(output))
 
+if config['use_host_filter']:
+    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal']
+else:
+    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '3_error_removal']
 
 rule sample_statistics:
     input:
         init = join(dirs.OUT, '{sample}' + '_read_stats.csv'),
-        step = lambda wildcards: expand(join(dirs.OUT, '{step}', '{sample}_read_stats.csv'), step = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal'], sample = wildcards.sample),
+        step = lambda wildcards: expand(join(dirs.OUT, '{step}', '{sample}_read_stats.csv'), step = sample_statistics_steps, sample = wildcards.sample),
     output:
         join(dirs.OUT, '4_summary', '{sample}_read_stats.csv'),
     run:
@@ -276,21 +312,23 @@ rule concat_statistics:
         """
 
 
+
 rule make_config:
     input:
-        mqc = expand(join(dirs.OUT, '4_summary', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
         sts = join(dirs.OUT, 'final_reports', 'read_stats.csv'),
     output:
         cfg = join(dirs.OUT, 'final_reports', 'samples.csv'),
-        pre = join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'),
-        post = join(dirs.OUT, 'final_reports', 'post_multiqc_report.html'),
     params: 
+        mqc = expand(join(dirs.OUT, '4_summary', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
         fastq_dir = join(dirs.OUT, '3_error_removal'),
         multiqc_dir = join(dirs.OUT, '4_summary'),
         samples = SAMPLES,
+        pre = join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'),
+        post = join(dirs.OUT, 'final_reports', 'post_multiqc_report.html'),
     run:
-        shutil.copy(str(input.mqc[0]), str(output.pre))
-        shutil.copy(str(input.mqc[1]), str(output.post))
+        if config['qc_option']:
+            shutil.copy(str(params.mqc[0]), str(params.pre))
+            shutil.copy(str(params.mqc[1]), str(params.post))
         dct = {}
         for i in params.samples:
             s = i.split('/')[-1]

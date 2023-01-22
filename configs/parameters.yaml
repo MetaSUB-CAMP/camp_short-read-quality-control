@@ -27,3 +27,7 @@ host_reference_database: '/athena/masonlab/scratch/databases/metagenomics/HG37_I
 # --- filter_seq_errors --- #
 
 error_correct_option: 'tadpole'
+
+# --- qc-option --- #
+
+qc_option: False
