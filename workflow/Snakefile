@@ -22,17 +22,13 @@ SAMPLES = ingest_samples(config['samples'], dirs.TMP)
 dedup_flag = '--dedup' if config['dedup'] else '--dont_eval_duplication'
 
 
-# --- Workflow output --- #
+# optional rules management
 
+## 1. qc options - either conducting fastqc and multiqc or not
 all_results = [join(dirs.OUT, 'final_reports', 'read_stats.csv'),
         join(dirs.OUT, 'final_reports', 'samples.csv')]
 if config['qc_option']:
     all_results.extend([join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'), join(dirs.OUT, 'final_reports', 'post_multiqc_report.html')])
-else:
-    print("Here we are printing!")
-
-print(all_results)
-
 
 if not config['qc_option']:
     with open(join(dirs.OUT, '4_summary', 'pre_multiqc_report.html'), 'w') as fp:
@@ -40,11 +36,19 @@ if not config['qc_option']:
     with open(join(dirs.OUT, '4_summary', 'post_multiqc_report.html'), 'w') as fp:
         pass
 
+
+## 2. whether to use host filtering
+if config['use_host_filter']:
+    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal']
+else:
+    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '3_error_removal']
+
+
+
+# --- Workflow output --- #
+
 rule all:
     input:
-        # expand(join(dirs.OUT, 'final_reports', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
-        # join(dirs.OUT, 'final_reports', 'read_stats.csv'),
-        # join(dirs.OUT, 'final_reports', 'samples.csv')
         all_results
 
 
@@ -59,7 +63,9 @@ def workflow_mode(wildcards):
 
 # --- Workflow modules --- #
 
-
+# low quality sequence filter using fastp
+# Shifu Chen, Yanqing Zhou, Yaru Chen, Jia Gu; fastp: an ultra-fast all-in-one FASTQ preprocessor, Bioinformatics, Volume 34, Issue 17, 1 September 2018, Pages i884–i890, 
+# https://doi.org/10.1093/bioinformatics/bty560
 # Multi-purpose filter: Quality, length, Ns, polyG/X
 # No deduplication to keep relative abundance signal
 rule filter_low_qual:
@@ -87,8 +93,9 @@ rule filter_low_qual:
             -h {params.out_dir}/{params.sample}.html > {log} 2>&1
         """
 
-# fastp -i 306557045_S155_L003_R1_001.fastq.gz -I 306557045_S155_L003_R2_001.fastq.gz -o low_qual_306557045_S155_L003_R1_001.fastq.gz -O low_qual_306557045_S155_L003_R2_001.fastq.gz -q 30 False --thread 24 
-# /usr/bin/time -v fastp -i 306555939_S142_L003_R1_001.fastq.gz -I 306555939_S142_L003_R2_001.fastq.gz -o low_qual_306555939_S142_L003_R1_001.fastq.gz -O low_qual_306555939_S142_L003_R2_001.fastq.gz -q 30 False --thread 16
+# filter adapters using AdapterRemoval
+# Schubert, Lindgreen, and Orlando (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 12;9(1):88 
+# http://bmcresnotes.biomedcentral.com/articles/10.1186/s13104-016-1900-2
 rule filter_adapters:
     input:
         fwd = join(dirs.OUT, '0_lowqual_removal', '{sample}_1.fastq.gz'),
@@ -105,16 +112,9 @@ rule filter_adapters:
         --output1 {output.fwd} --output2 {output.rev} --trimns --trimqualities --gzip
         """
 
-# /usr/bin/time -v java -classpath /home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/trimmomatic.jar org.usadellab.trimmomatic.TrimmomaticPE -phred33 -threads 2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306555939_S142_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306555939_S142_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R1_001_unp.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R2_001_unp.fastq.gz ILLUMINACLIP:/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters/TruSeq3-PE-2.fa:2:30:10:3:true
-
-# /usr/bin/time -v java -classpath /home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/trimmomatic.jar org.usadellab.trimmomatic.TrimmomaticPE -phred33 -threads 12 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R1_001_unp.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306557045_S155_L003_R1_001_unp.fastq.gz ILLUMINACLIP:/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters/TruSeq3-PE-2.fa:2:30:10:3:true
-
-# # cutadapt
-# /usr/bin/time -v cutadapt -a ADAPTER_FWD -A ADAPTER_REV --cores=16 -o /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/cutadapt_306557045_S155_L003_R1_001.fastq.gz -p /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/cutadapt_306557045_S155_L003_R2_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz
-
-# # AdapterRemoval
-# /usr/bin/time -v AdapterRemoval --threads 16 --file1 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz --file2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz --basename /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/AAAdapterRemoval_306557045_S155_L003_RX_001 --trimns --trimqualities --collapse  --gzip
-# /usr/bin/time -v AdapterRemoval --threads 16 --file1 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R1_001.fastq.gz --file2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/low_qual_306557045_S155_L003_R2_001.fastq.gz --output1 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/AAAdapterRemoval_306557045_S155_L003_R1_001.fastq.gz --output2 /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/AAAdapterRemoval_306557045_S155_L003_R2_001.fastq.gz --trimns --trimqualities --gzip
+# [OPTIONAL] filtering out host reads using bowtie2
+# Langmead B, Salzberg SL. Fast gapped-read alignment with Bowtie 2. Nat Methods. 2012 Mar 4;9(4):357-9. doi: 10.1038/nmeth.1923. PMID: 22388286; PMCID: PMC3322381.
+# https://www.metagenomics.wiki/tools/short-read/remove-host-sequences
 rule filter_host_reads:
     input:
         fwd = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
@@ -138,7 +138,9 @@ rule filter_host_reads:
             print("empty host cleaning files created: {output.fwd} & {output.rev}")
 
 
-
+# filter out sequencing errors using either spades' error correction module (BayesHammer) or tadpole
+# BayesHammer: Nikolenko, S.I., Korobeynikov, A.I. & Alekseyev, M.A. BayesHammer: Bayesian clustering for error correction in single-cell sequencing. BMC Genomics 14 (Suppl 1), S7 (2013). https://doi.org/10.1186/1471-2164-14-S1-S7
+# tadpole (as part of BBMap): Bushnell, B. BBMap:  A Fast, Accurate, Splice-Aware Aligner. https://www.osti.gov/biblio/1241166
 rule filter_seq_errors:
     input:
         workflow_mode,
@@ -162,22 +164,14 @@ rule filter_seq_errors:
             shell("spades.py --only-error-correction --meta -t {threads} -m {resources.mem_mb} -1 {input[0]} -2 {input[1]} -o {params.out_dir} > {log} 2>&1")
         elif config['error_correct_option'] == 'tadpole':
         # to add repair
+            shell("")
             shell("/home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/repair.sh in={input[0]} in2={input[1]} out={params.fwd_repair} out2={params.rev_repair} && /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={params.fwd_repair} in2={params.rev_repair} out={output.fwd} out2={output.rev}")
             # shell("/home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={params.fwd_tadpole} out2={params.rev_tadpole}")
             # shell("/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={param.fwd_tadpole} out2={param.rev_tadpole} > {log} 2>&1")
             print("tadpole run on", '{sample}_1.fastq.00.0_0.cor.fastq.gz')
 
 
-
-# || /configs/tadpole/bbmap/repair.sh in={input[0]} in2={input[1]} out={params.fwd_repair} out2={params.rev_repair} && /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={params.fwd_repair} in2={params.rev_repair} out={params.fwd_tadpole} out2={params.rev_tadpole} > {log} 2>&1
-# /usr/bin/time -v /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/repair.sh  t=16 in=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R1_001.fastq.gz in2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/adaptor_removal_306555939_S142_L003_R2_001.fastq.gz out=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R1_001.fastq.gz out2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R2_001.fastq.gz
-# /usr/bin/time -v /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t=16 in=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R1_001.fastq.gz in2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/repaired_306555939_S142_L003_R1_001.fastq.gz out=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306555939_S142_L003_R1_001.fastq.gz out2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306555939_S142_L003_R2_001.fastq.gz
-
-
-# /usr/bin/time -v /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t=16 in=AdapterRemoval_306557045_S155_L003_RX_001.pair1.truncated.fastq in2=AdapterRemoval_306557045_S155_L003_RX_001.pair2.truncated.fastq out=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306557045_S155_L003_R1_001.fastq.gz out2=/athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306557045_S155_L003_R2_001.fastq.gz
-
-
-# So that FastQs generated in the previous step will not get deleted
+# procedural step so that FastQs generated in the previous step will not get deleted
 # note that if it's tadpole then no need to be deleted
 rule move_corr_reads: 
     input:
@@ -198,7 +192,8 @@ rule move_corr_reads:
         fi
         """
 
-
+# [OPTIONAL] fastqc before everything to give quality control visualization and stats
+# Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 rule fastqc_pre:
     input:
         join(dirs.TMP,'{sample}_{dir}.fastq.gz'),
@@ -208,17 +203,13 @@ rule fastqc_pre:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_pre'),
-    # run:
-    #     if config['qc_option']:
-    #         shell("fastqc {input} -d {params.out_dir} --outdir {params.out_dir}")
-    #     else:
-    #         shell("touch {output}")
     shell:
         """
         fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
 
-# /usr/bin/time -v fastqc 306557045_S155_L003_R1_001.fastq.gz -d /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_pre --outdir /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_pre
+# [OPTIONAL] fastqc after everything to give quality control visualization and stats
+# Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 rule fastqc_post:
     input:
         join(dirs.OUT, '3_error_removal', '{sample}_{dir}.fastq.gz'),
@@ -229,16 +220,12 @@ rule fastqc_post:
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_post'),
     shell:
-    # run:
-    #     if config['qc_option']:
-    #         shell("fastqc {input} -d {params.out_dir} --outdir {params.out_dir}")
-    #     else:
-    #         shell("touch {output}")
         """
         fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
         """
 
-# /usr/bin/time -v fastqc /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/seq_error_306557045_S155_L003_R1_001.fastq.gz -d /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_post --outdir /athena/masonlab/scratch/users/chf4012/fairbanks/test_big_small/fastqc_post
+# [OPTIONAL] multiqc for multi-sequence quality control report generation
+# Philip Ewels, Måns Magnusson, Sverker Lundin, Max Käller, MultiQC: summarize analysis results for multiple tools and samples in a single report, Bioinformatics, Volume 32, Issue 19, 1 October 2016, Pages 3047–3048, https://doi.org/10.1093/bioinformatics/btw354
 rule multiqc:
     input:
         lambda wildcards: expand(join(dirs.OUT, '4_summary', 'fastqc_{eval}', '{sample}_{dir}_fastqc.html'), eval = wildcards.eval, sample = SAMPLES, dir = ['1', '2']),
@@ -249,16 +236,11 @@ rule multiqc:
     params:
         in_dir = join(dirs.OUT, '4_summary', 'fastqc_{eval}'),
     shell:
-    # run:
-    #     if config['qc_option']:
-    #         shell("multiqc --force {params.in_dir} -n {output}")
-    #     else:
-    #         shell("touch {output}")
         """
         multiqc --force {params.in_dir} -n {output}
         """
 
-
+# generate initial data stats
 rule init_statistics:
     input:
         fwd = join(dirs.TMP,'{sample}_1.fastq.gz'),
@@ -273,6 +255,7 @@ rule init_statistics:
         calc_read_lens(str(params.sample), '0_begin', input, str(output))
 
 
+# generate data stats after each step
 rule step_statistics:
     input:
         lambda wildcards: expand(join(dirs.OUT, '{step}', '{sample}_{dir}.fastq.gz'), step = wildcards.step, sample = wildcards.sample, dir = ['1', '2'])
@@ -286,11 +269,8 @@ rule step_statistics:
     run:
         calc_read_lens(str(params.sample), str(params.step), input, str(output))
 
-if config['use_host_filter']:
-    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal']
-else:
-    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '3_error_removal']
 
+# generate sample statistics after finishing all above rules
 rule sample_statistics:
     input:
         init = join(dirs.OUT, '{sample}' + '_read_stats.csv'),
@@ -300,7 +280,7 @@ rule sample_statistics:
     run:
         sample_statistics([str(input.init)] + input.step, str(output))
 
-
+# concatenate statistics after finishing all rules
 rule concat_statistics:
     input:
         expand(join(dirs.OUT, '4_summary', '{sample}_read_stats.csv'), sample = SAMPLES),
@@ -311,13 +291,23 @@ rule concat_statistics:
         echo -e "sample_name,step,num_reads,prop_init_reads,total_size,prop_init_size,mean_read_len" | cat - {input} > {output}
         """
 
-
-
+# generate a csv file containing all the paths of the resultant samples that successfully went through all the rules
+make_config_outputs = [join(dirs.OUT, 'final_reports', 'samples.csv')]
+make_config_inputs = [join(dirs.OUT, 'final_reports', 'read_stats.csv')]
+if config['qc_option']:
+    make_config_outputs.extend([join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'),
+                        join(dirs.OUT, 'final_reports', 'post_multiqc_report.html')])
+    make_config_inputs.extend([join(dirs.OUT, '4_summary', 'pre_multiqc_report.html'),
+                        join(dirs.OUT, '4_summary', 'post_multiqc_report.html')])
+    
+print()                     
 rule make_config:
     input:
-        sts = join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        # sts = join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        make_config_inputs,
     output:
-        cfg = join(dirs.OUT, 'final_reports', 'samples.csv'),
+        # cfg = join(dirs.OUT, 'final_reports', 'samples.csv'),
+        make_config_outputs,
     params: 
         mqc = expand(join(dirs.OUT, '4_summary', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
         fastq_dir = join(dirs.OUT, '3_error_removal'),
@@ -338,4 +328,4 @@ rule make_config:
         df = pd.DataFrame.from_dict(dct, orient ='index')
         df.reset_index(inplace = True)
         df.rename(columns = {'index': 'sample_name'}, inplace = True)
-        df.to_csv(str(output.cfg), index = False)
+        df.to_csv(str(output[0]), index = False)
