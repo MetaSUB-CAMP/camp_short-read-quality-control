@@ -1,0 +1,8 @@
+- "left reads":
+  - "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg/corrected/uhgg_1.fastq.00.0_0.cor.fastq.gz"
+  "orientation": "fr"
+  "right reads":
+  - "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg/corrected/uhgg_2.fastq.00.0_0.cor.fastq.gz"
+  "single reads":
+  - "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg/corrected/uhgg__unpaired.00.0_0.cor.fastq.gz"
+  "type": "paired-end"

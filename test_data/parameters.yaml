@@ -13,11 +13,11 @@ dedup:      False
 
 # --- filter_adapters --- #
 
-trim_exec: '/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/trimmomatic.jar'
-trim_adapters: '/home/lam4003/bin/anaconda3/share/trimmomatic-0.39-2/adapters/TruSeq3-PE-2.fa'
+trim_exec: '/home/lam4003/bin/Trimmomatic-0.39/trimmomatic-0.39.jar'
+trim_adapters: '/home/lam4003/bin/Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa'
 
 
 # --- filter_host_reads --- #
 
 use_host_filter:         True
-host_reference_database: '/athena/masonlab/scratch/databases/metagenomics/HG37_Index/hg37dec_v0.1'
+host_reference_database: '/workdir/lam4003/Databases/GRCh38_28122022/GCA_000001405.15_GRCh38_genomic'

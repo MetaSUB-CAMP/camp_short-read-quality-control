@@ -7,7 +7,7 @@ CAMP Short-Read Quality Control
         :target: https://camp-short-read-quality-control.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-.. image:: https://img.shields.io/badge/version-0.1.0-brightgreen
+.. image:: https://img.shields.io/badge/version-0.4.0-brightgreen
 
 
 Overview
@@ -35,7 +35,7 @@ Installation
     wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/#:~:text=GCA_000001405.15_GRCh38_genomic.fna.gz
     bowtie2-build --threads 20 GCA_000001405.15_GRCh38_genomic.fna.gz GCA_000001405.15_GRCh38_genomic
 
-5. Update the locations of the test datasets in ``samples.csv``, and the relevant parameters in ``configs/parameters.yaml``.
+5. Update the locations of the test datasets in ``samples.csv``, and the relevant parameters in ``test_data/parameters`` and ``configs/parameters.yaml``.
 
 6. Make sure the installed pipeline works correctly. 
 ::
@@ -43,13 +43,9 @@ Installation
     cd camp_short-read-quality-control
     conda env create -f configs/conda/short-read-quality-control.yaml
     conda activate short-read-quality-control
+    
     # Run tests on the included sample dataset
-    python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py \
-    -d /path/to/camp_short-read-quality-control/test_out \
-    -s /path/to/camp_short-read-quality-control/test_data/samples.csv \
-    -p /path/to/camp_short-read-quality-control/test_data/parameters.yaml \
-    -r /path/to/camp_short-read-quality-control/test_data/resources.yaml \
-    --cores 20
+    python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py test
 
 
 Using the Module
@@ -57,7 +53,7 @@ Using the Module
 
 **Input**: ``/path/to/samples.csv`` provided by the user.
 
-**Output**: 1) An output config file summarizing the locations of the error-corrected FastQs, 2) the MultiQC report summarizing the properties for the QC-ed FastQ, and 3) summary statistics about the dataset after each error correction step indicating how many reads and/or bases were pruned
+**Output**: 1) An output config file summarizing the locations of the error-corrected FastQs, 2) the MultiQC report summarizing the properties for the QC-ed FastQ, and 3) summary statistics about the dataset after each error correction step indicating how many reads and/or bases were pruned. For more information, see the demo test output directory in ``test_data/test_out``. 
 
 - ``/path/to/work/dir/short_read_qc/final_reports/samples.csv`` for ingestion by the next module
 
@@ -155,10 +151,10 @@ These instructions are meant for developers who have made a tool and want to int
 5. Run the pipeline once through to make sure everything works using the test data in ``test_data/`` if appropriate, or your own appropriately-sized test data. 
     * Note: Python functions imported from ``utils.py`` into ``Snakefile`` should be debugged on the command-line first before being added to a rule because Snakemake doesn't port standard output/error well when using ``run:``.
 
-5. Increment the version number of the modular pipeline.
+5. Increment the version number of the modular pipeline- ``patch`` for bug fixes (changes E), ``minor`` for substantial changes to the rules and/or workflow (changes C), and ``major`` only applies to major releases of the CAMP. 
 ::
-    bump2version --allow-dirty --commit --tag major workflow/__init__.py \
-                 --current-version A.C.E --new-version B.D.F
+
+    bump2version --current-version A.C.E patch
 
 6. If you want your tool integrated into the main CAMP pipeline, send a pull request and we'll have a look at it ASAP! 
     - Please make it clear what your tool intends to do by including a summary in the commit/pull request (ex. "Release X.Y.Z: Integration of tool A, which does B to C and outputs D").

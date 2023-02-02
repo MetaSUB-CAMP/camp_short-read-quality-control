@@ -1,0 +1,39 @@
+Read1 before filtering:
+total reads: 114917
+total bases: 17237550
+Q20 bases: 16597167(96.285%)
+Q30 bases: 12322885(71.4886%)
+
+Read2 before filtering:
+total reads: 114917
+total bases: 17237550
+Q20 bases: 16399109(95.136%)
+Q30 bases: 11669797(67.6999%)
+
+Read1 after filtering:
+total reads: 113027
+total bases: 16954050
+Q20 bases: 16324490(96.2867%)
+Q30 bases: 12122009(71.4992%)
+
+Read2 after filtering:
+total reads: 113027
+total bases: 16954050
+Q20 bases: 16134009(95.1632%)
+Q30 bases: 11503280(67.8497%)
+
+Filtering result:
+reads passed filter: 226054
+reads failed due to low quality: 3780
+reads failed due to too many N: 0
+reads failed due to too short: 0
+reads with adapter trimmed: 0
+bases trimmed due to adapters: 0
+
+Insert size peak (evaluated by paired-end reads): 201
+
+JSON report: /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.json
+HTML report: /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.html
+
+fastp -i /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/tmp/uhgg_1.fastq.gz -I /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/tmp/uhgg_2.fastq.gz -o /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg_1.fastq.gz -O /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg_2.fastq.gz -q 30 --dont_eval_duplication --thread 4 -j /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.json -h /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.html 
+fastp v0.22.0, time used: 2 seconds

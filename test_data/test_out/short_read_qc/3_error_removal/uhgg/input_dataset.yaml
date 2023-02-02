@@ -1,0 +1,6 @@
+- "left reads":
+  - "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/2_host_removal/uhgg_1.fastq.gz"
+  "orientation": "fr"
+  "right reads":
+  - "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/2_host_removal/uhgg_2.fastq.gz"
+  "type": "paired-end"

@@ -49,12 +49,12 @@ class Workflow_Dirs:
             check_make(join(self.LOG, d))
 
 
-def print_cmds(log):
-    fo = basename(log).split('.')[0] + '.cmds'
-    lines = open(log, 'r').read().split('\n')
-    fi = [l for l in lines if l != '']
+def print_cmds(f):
+    # fo = basename(log).split('.')[0] + '.cmds'
+    # lines = open(log, 'r').read().split('\n')
+    fi = [l for l in f.split('\n') if l != '']
     write = False
-    with open(fo, 'w') as f_out:
+    with open('commands.sh', 'w') as f_out:
         for l in fi:
             if 'rule' in l:
                 f_out.write('# ' + l.strip().replace('rule ', '').replace(':', '') + '\n')

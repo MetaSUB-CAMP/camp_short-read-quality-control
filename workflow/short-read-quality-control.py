@@ -3,8 +3,10 @@
 
 import click
 from click_default_group import DefaultGroup
+from contextlib import redirect_stdout
 from os import getcwd, makedirs
 from os.path import abspath, dirname, exists, join
+import pandas as pd
 from snakemake import snakemake, main
 from shutil import rmtree
 from utils import Workflow_Dirs, print_cmds, cleanup_files
@@ -72,18 +74,27 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
     help = 'Absolute path to parameters YAML file')
 @click.option('-r', '--resources', type = click.Path(), required = False, \
     help = 'Absolute path to computational resources YAML file')
-@click.option('--unit_test', is_flag = True, default = False, \
-    help = 'Generate unit tests using Snakemake API')
+# @click.option('--unit_test', is_flag = True, default = False, \
+#     help = 'Generate unit tests using Snakemake API')
 @click.option('--slurm', is_flag = True, default = False, \
     help = 'Run workflow by submitting rules as Slurm cluster jobs')
 @click.option('--dry_run', is_flag = True, default = False, \
     help = 'Set up directory structure and print workflow commands to be run separately')
 @click.option('--unlock', is_flag = True, default = False, \
     help = 'Remove a lock on the work directory')
-def run(cores, work_dir, samples, parameters, resources, unit_test, slurm, dry_run, unlock):
+@click.option('--version', is_flag = True, default = False, \
+    help = 'Check the module version')
+def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock, version): # unit_test, 
     # Get the absolute path of the Snakefile to find the profile configs
     main_dir = dirname(dirname(abspath(__file__))) # /path/to/main_dir/workflow/cli.py
     workflow = join(main_dir, 'workflow', 'Snakefile')
+
+    if version:
+        f = open(join(main_dir, 'workflow', '__init__.py')).readlines()
+        m = f[0].replace('"""Top-level package for the ', '').replace(' module."""', '')
+        v = f[4].split(' = ')[1]
+        print('{}: version {}'.format(m, v))
+        return
 
     # Set location of rule (and program) parameters and resources
     pyaml = parameters if parameters else join(main_dir, 'configs', 'parameters.yaml')
@@ -96,12 +107,12 @@ def run(cores, work_dir, samples, parameters, resources, unit_test, slurm, dry_r
     env_yamls = join(main_dir, 'configs', 'conda')
 
     # If generating unit tests, set the unit test directory (by default, is pytest's default, .tests)
-    unit_test_dir = join(main_dir, '.tests/unit') if unit_test else None
+    # unit_test_dir = join(main_dir, '.tests/unit') if unit_test else None
 
     # If rules failed previously, unlock the directory
     if unlock:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, unit_test_dir, False, unlock)        
+                 cores, env_dir, None, False, unlock) # unit_test_dir, 
         rmtree(join(getcwd(), '.snakemake'))
         
     # Run workflow
@@ -112,11 +123,14 @@ def run(cores, work_dir, samples, parameters, resources, unit_test, slurm, dry_r
         # Set up the directory structure skeleton
         Workflow_Dirs(work_dir, 'short-read-taxonomy')
         # Print the dry run standard out
-        cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, unit_test_dir, True, False)
+        f = io.StringIO()
+        with redirect_stdout(f):
+            cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
+                     cores, env_dir, None, True, False) # unit_test_dir, 
+        print_cmds(f.getvalue())
     else:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, unit_test_dir, False, False)
+                 cores, env_dir, None, False, False) # unit_test_dir, 
 
 
 @cli.command('cleanup')
@@ -129,15 +143,31 @@ def cleanup(work_dir, samples):
     cleanup_files(work_dir, df)
 
 
-@cli.command('commands')
-@click.argument('input', type = click.Path(), required = True)
-def commands(input): 
-    print_cmds(input)
+@cli.command('test')
+def test(): 
+    main_dir = dirname(dirname(abspath(__file__))) # /path/to/main_dir/workflow/cli.py
+    workflow = join(main_dir, 'workflow', 'Snakefile')
+    work_dir = join(main_dir, 'test_out')
+    samples = join(main_dir, 'test_data', 'samples.csv')
+    
+    # Set location of rule (and program) parameters and resources
+    pyaml = join(main_dir, 'test_data', 'parameters.yaml')
+    ryaml = join(main_dir, 'test_data', 'resources.yaml')
+
+    # Set up the conda environment directory
+    env_dir = join(main_dir, 'conda_envs')
+    if not exists(env_dir):
+        makedirs(env_dir)
+    env_yamls = join(main_dir, 'configs', 'conda')
+    
+    # Run workflow
+    cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
+             10, env_dir, None, False, False)
 
 
 cli.add_command(run)
 cli.add_command(cleanup)
-cli.add_command(commands)
+cli.add_command(test)
 
 
 if __name__ == '__main__':

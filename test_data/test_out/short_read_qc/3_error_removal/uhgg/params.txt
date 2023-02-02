@@ -1,0 +1,30 @@
+Command line: /home/lam4003/bin/anaconda/envs/short-read-quality-control/bin/spades.py	--only-error-correction	--meta	-t	12	-m	150000	-1	/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/2_host_removal/uhgg_1.fastq.gz	-2	/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/2_host_removal/uhgg_2.fastq.gz	-o	/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg	
+
+System information:
+  SPAdes version: 3.14.1
+  Python version: 3.8.13
+  OS: Linux-5.14.0-70.13.1.el9_0.x86_64-x86_64-with-glibc2.10
+
+Output dir: /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg
+Mode: ONLY read error correction (without assembling)
+Debug mode is turned OFF
+
+Dataset parameters:
+  Metagenomic mode
+  Reads:
+    Library number: 1, library type: paired-end
+      orientation: fr
+      left reads: ['/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/2_host_removal/uhgg_1.fastq.gz']
+      right reads: ['/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/2_host_removal/uhgg_2.fastq.gz']
+      interlaced reads: not specified
+      single reads: not specified
+      merged reads: not specified
+Read error correction parameters:
+  Iterations: 1
+  PHRED offset will be auto-detected
+  Corrected reads will be compressed
+Other parameters:
+  Dir for temp files: /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg/tmp
+  Threads: 12
+  Memory limit (in Gb): 150000
+

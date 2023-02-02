@@ -1,0 +1,2 @@
+sample_name,illumina_fwd,illumina_rev
+uhgg,/home/lam4003/bin/camp_short-read-quality-control/test_data/uhgg_1.fastq.gz,/home/lam4003/bin/camp_short-read-quality-control/test_data/uhgg_2.fastq.gz
