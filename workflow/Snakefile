@@ -43,7 +43,11 @@ if config['use_host_filter']:
 else:
     sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '3_error_removal']
 
-
+## 3. whether to use user-provided adapter lists (provided in txt format with each line having 2 adapters for fwd and rev strands)
+if config['adapters'] == '':
+    adapter_list_str = ''
+else:
+    adapter_list_str = '--adapter-list '+str(config['adapters'])
 
 # --- Workflow output --- #
 
@@ -106,10 +110,11 @@ rule filter_adapters:
     threads: config['filter_adapters_threads'],
     params:
         outbase = join(dirs.OUT, '1_adapter_removal', '{sample}'),
+        adapter_l = adapter_list_str
     shell:
         """
         AdapterRemoval --threads {threads} --file1 {input.fwd} --file2 {input.rev} \
-        --output1 {output.fwd} --output2 {output.rev} --trimns --trimqualities --gzip
+        --output1 {output.fwd} --output2 {output.rev} {params.adapter_l} --trimns --trimqualities --gzip
         """
 
 # [OPTIONAL] filtering out host reads using bowtie2
@@ -300,7 +305,7 @@ if config['qc_option']:
     make_config_inputs.extend([join(dirs.OUT, '4_summary', 'pre_multiqc_report.html'),
                         join(dirs.OUT, '4_summary', 'post_multiqc_report.html')])
     
-print()                     
+                  
 rule make_config:
     input:
         # sts = join(dirs.OUT, 'final_reports', 'read_stats.csv'),
