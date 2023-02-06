@@ -27,3 +27,7 @@ filter_host_reads_mem_mb: 80000
 filter_seq_errors_threads: 24
 filter_seq_errors_mem_mb: 250000
 
+# --- qc --- #
+
+qc_threads: 24
+

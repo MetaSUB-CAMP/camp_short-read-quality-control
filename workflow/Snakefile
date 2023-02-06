@@ -204,13 +204,14 @@ rule fastqc_pre:
         join(dirs.TMP,'{sample}_{dir}.fastq.gz'),
     output:
         join(dirs.OUT, '4_summary', 'fastqc_pre', '{sample}_{dir}_fastqc.html'),
+    threads: config['qc_threads'],
     conda:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_pre'),
     shell:
         """
-        fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
+        fastqc {input} -d {params.out_dir} --outdir {params.out_dir} -t {threads}
         """
 
 # [OPTIONAL] fastqc after everything to give quality control visualization and stats
@@ -220,13 +221,14 @@ rule fastqc_post:
         join(dirs.OUT, '3_error_removal', '{sample}_{dir}.fastq.gz'),
     output:
         join(dirs.OUT, '4_summary', 'fastqc_post', '{sample}_{dir}_fastqc.html'),
+    threads: config['qc_threads'],
     conda:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_post'),
     shell:
         """
-        fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
+        fastqc {input} -d {params.out_dir} --outdir {params.out_dir} -t {threads}
         """
 
 # [OPTIONAL] multiqc for multi-sequence quality control report generation
