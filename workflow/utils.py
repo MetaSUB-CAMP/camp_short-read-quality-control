@@ -58,13 +58,12 @@ def print_cmds(f):
         for l in fi:
             if 'rule' in l:
                 f_out.write('# ' + l.strip().replace('rule ', '').replace(':', '') + '\n')
-            if 'wildcards' in l: 
+                write = False
+            if 'wildcards' in l:
                 f_out.write('# ' + l.strip().replace('wildcards: ', '') + '\n')
             if 'resources' in l:
-                write = True 
+                write = True
                 l = ''
-            if '[' in l: 
-                write = False 
             if write:
                 f_out.write(l.strip() + '\n')
             if 'rule make_config' in l:

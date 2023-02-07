@@ -4,6 +4,7 @@
 import click
 from click_default_group import DefaultGroup
 from contextlib import redirect_stdout
+from io import StringIO
 from os import getcwd, makedirs
 from os.path import abspath, dirname, exists, join
 import pandas as pd
@@ -37,7 +38,7 @@ def sbatch(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir,
     ])
 
 
-def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, unit_test_dir, dry_run, unlock):
+def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_dir, dry_run, unlock):
     snakemake(
         workflow,
         config = {
@@ -56,7 +57,7 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
         printshellcmds = True,
         keepgoing = True,
         latency_wait = 60,
-        generate_unit_tests = unit_test_dir,
+        # generate_unit_tests = unit_test_dir,
         dryrun = dry_run,
         unlock = unlock
     )
@@ -75,7 +76,7 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
 @click.option('-r', '--resources', type = click.Path(), required = False, \
     help = 'Absolute path to computational resources YAML file')
 # @click.option('--unit_test', is_flag = True, default = False, \
-#     help = 'Generate unit tests using Snakemake API')
+#     help = 'Generate unit tests using the Snakemake API')
 @click.option('--slurm', is_flag = True, default = False, \
     help = 'Run workflow by submitting rules as Slurm cluster jobs')
 @click.option('--dry_run', is_flag = True, default = False, \
@@ -84,7 +85,7 @@ def cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml, cores, env_di
     help = 'Remove a lock on the work directory')
 @click.option('--version', is_flag = True, default = False, \
     help = 'Check the module version')
-def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock, version): # unit_test, 
+def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock, version): # unit_test
     # Get the absolute path of the Snakefile to find the profile configs
     main_dir = dirname(dirname(abspath(__file__))) # /path/to/main_dir/workflow/cli.py
     workflow = join(main_dir, 'workflow', 'Snakefile')
@@ -112,7 +113,7 @@ def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock,
     # If rules failed previously, unlock the directory
     if unlock:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, None, False, unlock) # unit_test_dir, 
+                 cores, env_dir, False, unlock) # unit_test_dir
         rmtree(join(getcwd(), '.snakemake'))
         
     # Run workflow
@@ -121,16 +122,16 @@ def run(cores, work_dir, samples, parameters, resources, slurm, dry_run, unlock,
                cores, env_dir, join(main_dir, 'configs', 'sbatch'))
     elif dry_run:
         # Set up the directory structure skeleton
-        Workflow_Dirs(work_dir, 'short-read-taxonomy')
+        Workflow_Dirs(work_dir, 'binning')
         # Print the dry run standard out
-        f = io.StringIO()
+        f = StringIO()
         with redirect_stdout(f):
             cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                     cores, env_dir, None, True, False) # unit_test_dir, 
+                     cores, env_dir, True, False) # unit_test_dir
         print_cmds(f.getvalue())
     else:
         cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-                 cores, env_dir, None, False, False) # unit_test_dir, 
+                 cores, env_dir, False, False) # unit_test_dir
 
 
 @cli.command('cleanup')

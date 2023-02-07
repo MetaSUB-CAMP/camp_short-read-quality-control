@@ -7,7 +7,7 @@ CAMP Short-Read Quality Control
         :target: https://camp-short-read-quality-control.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-.. image:: https://img.shields.io/badge/version-0.4.0-brightgreen
+.. image:: https://img.shields.io/badge/version-0.4.1-brightgreen
 
 
 Overview
