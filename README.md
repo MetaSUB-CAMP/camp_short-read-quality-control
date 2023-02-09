@@ -60,11 +60,26 @@ Running each CAMP module takes the same three steps, listed below.
 
 1. As with all CAMP modules, update the parameters.yaml file:
 
-<TABLE OF PARAMETERS AND DESCRIPTIONS>
+| parameter | explanation and options.                                                    | 
+|-----------|-----------------------------------------------------------------------------|
+| minqual       | integer parameter of fastp for low quality filtering  |
+| dedup      | whether to dedup, True or False  |
+| trimmomatic_dir       |  path to the directory containing Trimmomatic directory |
+|  trimmomatic_exec      |  path to the directory containing Trimmomatic executable |
+|  adapters      |  path to the directory containing Trimmomatic adapter installed on your machine |
+|  use_host_filter      |  whether to use the host filter part of the pipeline using bowtie2, True or False |
+|  host_reference_database      |  path to  the host reference database |
+|  error_correct_option      | software option for error correction, either 'tadpole' or 'spades' (latter is the BayesHammer option of spades)  |
+|  qc_option      | whether to perform quality check, True or False  |
+
 
 2. Generate your samples.csv file in the following format:
 
-<SAMPLES.CSV FORMAT>
+|  | illumina_fwd                                                    |  illumina_rev |
+|-----------|-----------------------------------------------------------------------------|---|
+| SAMPLE_NAME      | path to forward read fastq.gz file | path to backward read fastq.gz file  |
+| ...      | ...                         |...   |
+
 
 3. Deploy!
 ::

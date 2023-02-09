@@ -8,6 +8,7 @@ import pandas as pd
 import shutil
 from utils import Workflow_Dirs, ingest_samples, calc_read_lens, sample_statistics
 
+from itertools import product
 
 # Load and/or make the working directory structure
 dirs = Workflow_Dirs(config['work_dir'], 'short_read_qc')
@@ -21,14 +22,38 @@ SAMPLES = ingest_samples(config['samples'], dirs.TMP)
 dedup_flag = '--dedup' if config['dedup'] else '--dont_eval_duplication'
 
 
-# --- Workflow output --- #
+# optional rules management
 
+## 1. qc options - either conducting fastqc and multiqc or not
+all_results = [join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        join(dirs.OUT, 'final_reports', 'samples.csv')]
+if config['qc_option']:
+    all_results.extend([join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'), join(dirs.OUT, 'final_reports', 'post_multiqc_report.html')])
+
+if not config['qc_option']:
+    with open(join(dirs.OUT, '4_summary', 'pre_multiqc_report.html'), 'w') as fp:
+        pass
+    with open(join(dirs.OUT, '4_summary', 'post_multiqc_report.html'), 'w') as fp:
+        pass
+
+
+## 2. whether to use host filtering
+if config['use_host_filter']:
+    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal']
+else:
+    sample_statistics_steps = ['0_lowqual_removal', '1_adapter_removal', '3_error_removal']
+
+## 3. whether to use user-provided adapter lists (provided in txt format with each line having 2 adapters for fwd and rev strands)
+if config['adapters'] == '':
+    adapter_list_str = ''
+else:
+    adapter_list_str = '--adapter-list '+str(config['adapters'])
+
+# --- Workflow output --- #
 
 rule all:
     input:
-        expand(join(dirs.OUT, 'final_reports', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
-        join(dirs.OUT, 'final_reports', 'read_stats.csv'),
-        join(dirs.OUT, 'final_reports', 'samples.csv')
+        all_results
 
 
 def workflow_mode(wildcards):
@@ -42,7 +67,9 @@ def workflow_mode(wildcards):
 
 # --- Workflow modules --- #
 
-
+# low quality sequence filter using fastp
+# Shifu Chen, Yanqing Zhou, Yaru Chen, Jia Gu; fastp: an ultra-fast all-in-one FASTQ preprocessor, Bioinformatics, Volume 34, Issue 17, 1 September 2018, Pages i884–i890, 
+# https://doi.org/10.1093/bioinformatics/bty560
 # Multi-purpose filter: Quality, length, Ns, polyG/X
 # No deduplication to keep relative abundance signal
 rule filter_low_qual:
@@ -70,35 +97,29 @@ rule filter_low_qual:
             -h {params.out_dir}/{params.sample}.html > {log} 2>&1
         """
 
-
+# filter adapters using AdapterRemoval
+# Schubert, Lindgreen, and Orlando (2016). AdapterRemoval v2: rapid adapter trimming, identification, and read merging. BMC Research Notes, 12;9(1):88 
+# http://bmcresnotes.biomedcentral.com/articles/10.1186/s13104-016-1900-2
 rule filter_adapters:
     input:
         fwd = join(dirs.OUT, '0_lowqual_removal', '{sample}_1.fastq.gz'),
         rev = join(dirs.OUT, '0_lowqual_removal', '{sample}_2.fastq.gz'),
     output:
-        fwd = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
-        rev = join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz'),
-        fun = join(dirs.OUT, '1_adapter_removal', '{sample}_1_unp.fastq.gz'),
-        run = join(dirs.OUT, '1_adapter_removal', '{sample}_2_unp.fastq.gz'),
-    log:
-        join(dirs.LOG, 'adapter_removal', '{sample}.out'),
+        fwd  = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
+        rev  = join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz'),
     threads: config['filter_adapters_threads'],
-    resources:
-        mem_mb = config['filter_adapters_mem_mb'],
     params:
-        trim_exec = config['trim_exec'],
-        trim_adapters = config['trim_adapters'],
-        minqual = config['minqual'],
+        outbase = join(dirs.OUT, '1_adapter_removal', '{sample}'),
+        adapter_l = adapter_list_str
     shell:
         """
-        java -classpath {params.trim_exec} org.usadellab.trimmomatic.TrimmomaticPE \
-            -phred33 -threads {threads} -trimlog {log} \
-            {input.fwd} {input.rev} \
-            {output.fwd} {output.fun} {output.rev} {output.run} \
-            ILLUMINACLIP:{params.trim_adapters}:2:{params.minqual}:10:3:true
+        AdapterRemoval --threads {threads} --file1 {input.fwd} --file2 {input.rev} \
+        --output1 {output.fwd} --output2 {output.rev} {params.adapter_l} --trimns --trimqualities --gzip
         """
-    
 
+# [OPTIONAL] filtering out host reads using bowtie2
+# Langmead B, Salzberg SL. Fast gapped-read alignment with Bowtie 2. Nat Methods. 2012 Mar 4;9(4):357-9. doi: 10.1038/nmeth.1923. PMID: 22388286; PMCID: PMC3322381.
+# https://www.metagenomics.wiki/tools/short-read/remove-host-sequences
 rule filter_host_reads:
     input:
         fwd = join(dirs.OUT, '1_adapter_removal', '{sample}_1.fastq.gz'),
@@ -114,15 +135,17 @@ rule filter_host_reads:
     params:
         prefix = join(dirs.OUT, '2_host_removal', '{sample}'),
         host_ref_db = config['host_reference_database'],
-    shell:
-        """
-        bowtie2 --very-sensitive --threads {threads} -x {params.host_ref_db} \
-            -1 {input.fwd} -2 {input.rev} --un-conc-gz {params.prefix}_%.fastq.gz \
-            > {params.prefix}.sam 2> {log}
-        rm {params.prefix}.sam
-        """
+    run:
+        if config['use_host_filter']:
+            shell("bowtie2 --very-sensitive --threads {threads} -x {params.host_ref_db} -1 {input.fwd} -2 {input.rev} --un-conc-gz {params.prefix}_%.fastq.gz > {params.prefix}.sam 2> {log} rm {params.prefix}.sam")
+        else:
+            shell("touch {output.fwd} && touch {output.rev}")
+            print("empty host cleaning files created: {output.fwd} & {output.rev}")
 
 
+# filter out sequencing errors using either spades' error correction module (BayesHammer) or tadpole
+# BayesHammer: Nikolenko, S.I., Korobeynikov, A.I. & Alekseyev, M.A. BayesHammer: Bayesian clustering for error correction in single-cell sequencing. BMC Genomics 14 (Suppl 1), S7 (2013). https://doi.org/10.1186/1471-2164-14-S1-S7
+# tadpole (as part of BBMap): Bushnell, B. BBMap:  A Fast, Accurate, Splice-Aware Aligner. https://www.osti.gov/biblio/1241166
 rule filter_seq_errors:
     input:
         workflow_mode,
@@ -137,15 +160,24 @@ rule filter_seq_errors:
     params:
         prefix = join(dirs.OUT, '3_error_removal', '{sample}', 'corrected', '{sample}'),
         out_dir = join(dirs.OUT, '3_error_removal', '{sample}', ),
-    shell:
-        """
-        spades.py --only-error-correction --meta \
-            -t {threads} -m {resources.mem_mb} \
-            -1 {input[0]} -2 {input[1]} -o {params.out_dir} > {log} 2>&1
-        """
+        fwd_repair = join(dirs.OUT, '3_error_removal', '{sample}_repaired_1.fastq.00.0_0.cor.fastq.gz'),
+        rev_repair = join(dirs.OUT, '3_error_removal', '{sample}_repaired_2.fastq.00.0_0.cor.fastq.gz'),
+        fwd_tadpole = join(dirs.OUT, '3_error_removal', '{sample}_1.fastq.00.0_0.cor.fastq.gz'),
+        rev_tadpole = join(dirs.OUT, '3_error_removal', '{sample}_2.fastq.00.0_0.cor.fastq.gz'),
+    run:
+        if config['error_correct_option'] == 'spades':
+            shell("spades.py --only-error-correction --meta -t {threads} -m {resources.mem_mb} -1 {input[0]} -2 {input[1]} -o {params.out_dir} > {log} 2>&1")
+        elif config['error_correct_option'] == 'tadpole':
+        # to add repair
+            shell("")
+            shell("/home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/repair.sh in={input[0]} in2={input[1]} out={params.fwd_repair} out2={params.rev_repair} && /home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={params.fwd_repair} in2={params.rev_repair} out={output.fwd} out2={output.rev}")
+            # shell("/home/chf4012/camp_short-read-quality-control/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={params.fwd_tadpole} out2={params.rev_tadpole}")
+            # shell("/configs/tadpole/bbmap/tadpole.sh mode=correct  t={threads} in={input[0]} in2={input[1]} out={param.fwd_tadpole} out2={param.rev_tadpole} > {log} 2>&1")
+            print("tadpole run on", '{sample}_1.fastq.00.0_0.cor.fastq.gz')
 
 
-# So that FastQs generated in the previous step will not get deleted
+# procedural step so that FastQs generated in the previous step will not get deleted
+# note that if it's tadpole then no need to be deleted
 rule move_corr_reads: 
     input:
         fwd = join(dirs.OUT, '3_error_removal', '{sample}', 'corrected', '{sample}_1.fastq.00.0_0.cor.fastq.gz'),
@@ -165,37 +197,42 @@ rule move_corr_reads:
         fi
         """
 
-
+# [OPTIONAL] fastqc before everything to give quality control visualization and stats
+# Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 rule fastqc_pre:
     input:
         join(dirs.TMP,'{sample}_{dir}.fastq.gz'),
     output:
         join(dirs.OUT, '4_summary', 'fastqc_pre', '{sample}_{dir}_fastqc.html'),
+    threads: config['qc_threads'],
     conda:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_pre'),
     shell:
         """
-        fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
+        fastqc {input} -d {params.out_dir} --outdir {params.out_dir} -t {threads}
         """
 
-
+# [OPTIONAL] fastqc after everything to give quality control visualization and stats
+# Andrews, S. (2010). FastQC:  A Quality Control Tool for High Throughput Sequence Data [Online]. Available online at: http://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 rule fastqc_post:
     input:
         join(dirs.OUT, '3_error_removal', '{sample}_{dir}.fastq.gz'),
     output:
         join(dirs.OUT, '4_summary', 'fastqc_post', '{sample}_{dir}_fastqc.html'),
+    threads: config['qc_threads'],
     conda:
         join(config['env_yamls'], 'multiqc.yaml'),
     params:
         out_dir = join(dirs.OUT, '4_summary', 'fastqc_post'),
     shell:
         """
-        fastqc {input} -d {params.out_dir} --outdir {params.out_dir}
+        fastqc {input} -d {params.out_dir} --outdir {params.out_dir} -t {threads}
         """
 
-
+# [OPTIONAL] multiqc for multi-sequence quality control report generation
+# Philip Ewels, Måns Magnusson, Sverker Lundin, Max Käller, MultiQC: summarize analysis results for multiple tools and samples in a single report, Bioinformatics, Volume 32, Issue 19, 1 October 2016, Pages 3047–3048, https://doi.org/10.1093/bioinformatics/btw354
 rule multiqc:
     input:
         lambda wildcards: expand(join(dirs.OUT, '4_summary', 'fastqc_{eval}', '{sample}_{dir}_fastqc.html'), eval = wildcards.eval, sample = SAMPLES, dir = ['1', '2']),
@@ -210,7 +247,7 @@ rule multiqc:
         multiqc --force {params.in_dir} -n {output}
         """
 
-
+# generate initial data stats
 rule init_statistics:
     input:
         fwd = join(dirs.TMP,'{sample}_1.fastq.gz'),
@@ -225,6 +262,7 @@ rule init_statistics:
         calc_read_lens(str(params.sample), '0_begin', input, str(output))
 
 
+# generate data stats after each step
 rule step_statistics:
     input:
         lambda wildcards: expand(join(dirs.OUT, '{step}', '{sample}_{dir}.fastq.gz'), step = wildcards.step, sample = wildcards.sample, dir = ['1', '2'])
@@ -239,16 +277,17 @@ rule step_statistics:
         calc_read_lens(str(params.sample), str(params.step), input, str(output))
 
 
+# generate sample statistics after finishing all above rules
 rule sample_statistics:
     input:
         init = join(dirs.OUT, '{sample}' + '_read_stats.csv'),
-        step = lambda wildcards: expand(join(dirs.OUT, '{step}', '{sample}_read_stats.csv'), step = ['0_lowqual_removal', '1_adapter_removal', '2_host_removal', '3_error_removal'], sample = wildcards.sample),
+        step = lambda wildcards: expand(join(dirs.OUT, '{step}', '{sample}_read_stats.csv'), step = sample_statistics_steps, sample = wildcards.sample),
     output:
         join(dirs.OUT, '4_summary', '{sample}_read_stats.csv'),
     run:
         sample_statistics([str(input.init)] + input.step, str(output))
 
-
+# concatenate statistics after finishing all rules
 rule concat_statistics:
     input:
         expand(join(dirs.OUT, '4_summary', '{sample}_read_stats.csv'), sample = SAMPLES),
@@ -259,22 +298,34 @@ rule concat_statistics:
         echo -e "sample_name,step,num_reads,prop_init_reads,total_size,prop_init_size,mean_read_len" | cat - {input} > {output}
         """
 
-
+# generate a csv file containing all the paths of the resultant samples that successfully went through all the rules
+make_config_outputs = [join(dirs.OUT, 'final_reports', 'samples.csv')]
+make_config_inputs = [join(dirs.OUT, 'final_reports', 'read_stats.csv')]
+if config['qc_option']:
+    make_config_outputs.extend([join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'),
+                        join(dirs.OUT, 'final_reports', 'post_multiqc_report.html')])
+    make_config_inputs.extend([join(dirs.OUT, '4_summary', 'pre_multiqc_report.html'),
+                        join(dirs.OUT, '4_summary', 'post_multiqc_report.html')])
+    
+                  
 rule make_config:
     input:
-        mqc = expand(join(dirs.OUT, '4_summary', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
-        sts = join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        # sts = join(dirs.OUT, 'final_reports', 'read_stats.csv'),
+        make_config_inputs,
     output:
-        cfg = join(dirs.OUT, 'final_reports', 'samples.csv'),
-        pre = join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'),
-        post = join(dirs.OUT, 'final_reports', 'post_multiqc_report.html'),
+        # cfg = join(dirs.OUT, 'final_reports', 'samples.csv'),
+        make_config_outputs,
     params: 
+        mqc = expand(join(dirs.OUT, '4_summary', '{eval}_multiqc_report.html'), eval = ['pre', 'post']),
         fastq_dir = join(dirs.OUT, '3_error_removal'),
         multiqc_dir = join(dirs.OUT, '4_summary'),
         samples = SAMPLES,
+        pre = join(dirs.OUT, 'final_reports', 'pre_multiqc_report.html'),
+        post = join(dirs.OUT, 'final_reports', 'post_multiqc_report.html'),
     run:
-        shutil.copy(str(input.mqc[0]), str(output.pre))
-        shutil.copy(str(input.mqc[1]), str(output.post))
+        if config['qc_option']:
+            shutil.copy(str(params.mqc[0]), str(params.pre))
+            shutil.copy(str(params.mqc[1]), str(params.post))
         dct = {}
         for i in params.samples:
             s = i.split('/')[-1]
@@ -284,4 +335,4 @@ rule make_config:
         df = pd.DataFrame.from_dict(dct, orient ='index')
         df.reset_index(inplace = True)
         df.rename(columns = {'index': 'sample_name'}, inplace = True)
-        df.to_csv(str(output.cfg), index = False)
+        df.to_csv(str(output[0]), index = False)
