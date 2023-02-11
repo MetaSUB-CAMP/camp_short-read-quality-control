@@ -2,8 +2,8 @@
     "report_data_sources": {
         "FastQC": {
             "all_sections": {
-                "uhgg_1": "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_1_fastqc.zip",
-                "uhgg_2": "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_2_fastqc.zip"
+                "uhgg_1": "/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_1_fastqc.zip",
+                "uhgg_2": "/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_2_fastqc.zip"
             }
         }
     },
@@ -133,7 +133,7 @@
             }
         }
     ],
-    "report_multiqc_command": "/home/lam4003/bin/camp_short-read-quality-control/conda_envs/aa2dbd692949b9d95a245110fba5d016_/bin/multiqc --force /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre -n /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/pre_multiqc_report.html",
+    "report_multiqc_command": "/lustre2/home/lam4003/bin/camp_short-read-quality-control/conda_envs/aa2dbd692949b9d95a245110fba5d016_/bin/multiqc --force /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre -n /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/pre_multiqc_report.html",
     "report_plot_data": {
         "fastqc_sequence_counts_plot": {
             "plot_type": "bar_graph",
@@ -2939,12 +2939,12 @@
         }
     },
     "config_analysis_dir_abs": [
-        "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre"
+        "/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre"
     ],
     "config_analysis_dir": [
-        "/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre"
+        "/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre"
     ],
-    "config_creation_date": "2023-01-29, 15:04 EST",
+    "config_creation_date": "2023-02-11, 15:14 EST",
     "config_git_hash": "e8b28838b61a3d0bb80188416429488395bc4ca0",
     "config_intro_text": null,
     "config_report_comment": null,

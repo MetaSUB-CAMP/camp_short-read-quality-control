@@ -30,10 +30,10 @@ reads failed due to too short: 0
 reads with adapter trimmed: 0
 bases trimmed due to adapters: 0
 
-Insert size peak (evaluated by paired-end reads): 201
+Insert size peak (evaluated by paired-end reads): 199
 
-JSON report: /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.json
-HTML report: /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.html
+JSON report: /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/0_lowqual_removal/uhgg.json
+HTML report: /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/0_lowqual_removal/uhgg.html
 
-fastp -i /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/tmp/uhgg_1.fastq.gz -I /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/tmp/uhgg_2.fastq.gz -o /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg_1.fastq.gz -O /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg_2.fastq.gz -q 30 --dont_eval_duplication --thread 4 -j /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.json -h /home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/0_lowqual_removal/uhgg.html 
-fastp v0.22.0, time used: 2 seconds
+fastp -i /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/tmp/uhgg_1.fastq.gz -I /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/tmp/uhgg_2.fastq.gz -o /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/0_lowqual_removal/uhgg_1.fastq.gz -O /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/0_lowqual_removal/uhgg_2.fastq.gz -q 30 --dont_eval_duplication --thread 4 -j /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/0_lowqual_removal/uhgg.json -h /lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/0_lowqual_removal/uhgg.html 
+fastp v0.22.0, time used: 3 seconds

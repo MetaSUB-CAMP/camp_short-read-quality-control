@@ -1,3 +1,3 @@
 Module	Section	Sample Name	Source
-FastQC	all_sections	uhgg_1	/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_1_fastqc.zip
-FastQC	all_sections	uhgg_2	/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_2_fastqc.zip
+FastQC	all_sections	uhgg_1	/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_1_fastqc.zip
+FastQC	all_sections	uhgg_2	/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/4_summary/fastqc_pre/uhgg_2_fastqc.zip
