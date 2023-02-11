@@ -1,5 +1,5 @@
 """Top-level package for CAMP short-read quality control."""
 
-__author__ = 'Braden Tierney','Lauren Mak'
-__email__ = 'braden.tierney@gmail.com','laurenmak93@gmail.com'
-__version__ = '0.5.0'
+__author__ = 'Braden Tierney','Lauren Mak', 'Tom Fu'
+__email__ = 'braden.tierney@gmail.com','laurenmak93@gmail.com', 'chf4012@med.cornell.edu'
+__version__ = '0.6.0'

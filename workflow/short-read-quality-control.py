@@ -163,7 +163,7 @@ def test():
     
     # Run workflow
     cmd_line(workflow, work_dir, samples, env_yamls, pyaml, ryaml,   \
-             10, env_dir, None, False, False)
+             10, env_dir, False, False)
 
 
 cli.add_command(run)
