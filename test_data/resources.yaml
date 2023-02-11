@@ -3,6 +3,8 @@
 
 count_reads_mem_mb: 50000
 
+qc_threads: 10
+
 
 # --- filter_lowqual --- #
 

@@ -13,11 +13,24 @@ dedup:      False
 
 # --- filter_adapters --- #
 
-trim_exec: '/home/lam4003/bin/Trimmomatic-0.39/trimmomatic-0.39.jar'
-trim_adapters: '/home/lam4003/bin/Trimmomatic-0.39/adapters/TruSeq3-PE-2.fa'
+# '/path/to/camp_short-read-quality-control/workflow/ext/common_adapters.txt'
+adapters: '/home/lam4003/bin/camp_short-read-quality-control/workflow/ext/common_adapters.txt'
 
 
 # --- filter_host_reads --- #
 
 use_host_filter:         True
 host_reference_database: '/workdir/lam4003/Databases/GRCh38_28122022/GCA_000001405.15_GRCh38_genomic'
+
+
+# --- filter_seq_errors --- #
+
+# Options (must choose one): 'bayeshammer', 'tadpole'
+error_correction: 'tadpole'
+repair_scr: '/home/lam4003/bin/bbmap/repair.sh'
+tadpole_scr: '/home/lam4003/bin/bbmap/tadpole.sh'
+
+
+# --- qc-option --- #
+
+qc_dataviz: True
