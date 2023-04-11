@@ -27,7 +27,7 @@ tar xzf download
     - For example, I downloaded the latest major release of the human reference genome.
 ```Bash
 cd Databases/GRCh38_28122022/
-wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/#:~:text=GCA_000001405.15_GRCh38_genomic.fna.gz
+wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/GCA_000001405.15_GRCh38_genomic.fna.gz
 bowtie2-build --threads 20 GCA_000001405.15_GRCh38_genomic.fna.gz GCA_000001405.15_GRCh38_genomic
 ```
 
