@@ -26,12 +26,11 @@ tar xzf download
 4. Download the appropriate host reference genome(s) and make a Bowtie2 index using `bowtie2-build /path/to/host_reference.fa /path/to/host_reference`, and add the prefix `/path/to/host_reference` to `parameters.yaml`.
     - For example, I downloaded the latest major release of the human reference genome.
 ```Bash
-cd Databases/GRCh38_28122022/
 wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/GCA_000001405.15_GRCh38_genomic.fna.gz
 bowtie2-build --threads 20 GCA_000001405.15_GRCh38_genomic.fna.gz GCA_000001405.15_GRCh38_genomic
 ```
 
-5. Update the relevant parameters (if applicable- for example, location of external non-conda tools) in `test_data/parameters.yaml`.
+5. Update the relevant parameters (if applicable- for example, location of external non-conda tools, bbmap, your downloaded databases) in `test_data/parameters.yaml`.
 
 6. Make sure the installed pipeline works correctly. 
 ```Bash
