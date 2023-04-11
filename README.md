@@ -19,7 +19,7 @@ There are two filtration steps in the module- i) for general poor quality (Phred
 3. If you don't already have bbmap and tadpole installed through conda or as a standalone JAR, do the following:
 ```Bash
 cd /path/to/bin
-wget http://sourceforge.net/projects/bbmap/files/latest/download
+wget --no-check-certificate http://sourceforge.net/projects/bbmap/files/latest/download
 tar xzf download
 ```
 
