@@ -23,6 +23,8 @@ wget --no-check-certificate http://sourceforge.net/projects/bbmap/files/latest/d
 tar xzf download
 ```
 
+Note that tadpole is a module inside the bbmap software. In order to use the module after the installation of bbmap, one needs to enter configs/parameters.yaml, and enter the paths to the `repair.sh` and `tadpole.sh` files inside the bbmap directory you just installed in the entries named `repair_scr` and `tadpole_scr`.
+
 4. Download the appropriate host reference genome(s) and make a Bowtie2 index using `bowtie2-build /path/to/host_reference.fa /path/to/host_reference`, and add the prefix `/path/to/host_reference` to `parameters.yaml`.
     - For example, I downloaded the latest major release of the human reference genome.
 ```Bash
