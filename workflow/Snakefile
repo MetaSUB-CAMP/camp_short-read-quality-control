@@ -112,12 +112,16 @@ rule filter_adapters:
         rev  = join(dirs.OUT, '1_adapter_removal', '{sample}_2.fastq.gz'),
     threads: config['filter_adapters_threads'],
     params:
-        adapt_lst = '--adapter-list ' + str(config['adapters'])
+        adapt_lst = '--adapter-list ' + str(config['adapters']),
+        prefix = join(dirs.OUT, '1_adapter_removal', '{sample}'),
     shell:
         """
-        AdapterRemoval --file1 {input.fwd} --file2 {input.rev} \
-        --output1 {output.fwd} --output2 {output.rev} {params.adapt_lst} \
-        --trimns --trimqualities --threads {threads} --gzip
+        AdapterRemoval --gzip --file1 {input.fwd} --file2 {input.rev} \
+            --output1 {output.fwd} --output2 {output.rev} \
+            --discarded {params.prefix}.discarded.fastq.gz \
+            --singleton {params.prefix}.singleton.fastq.gz \
+            --settings {params.prefix}.settings \
+            {params.adapt_lst} --trimns --trimqualities --threads {threads}
         """
 
 
