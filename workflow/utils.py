@@ -4,6 +4,7 @@
 # --- Workflow setup --- #
 
 
+import glob
 import gzip
 import os
 from os import makedirs, symlink
@@ -72,10 +73,12 @@ def print_cmds(f):
 
 def cleanup_files(work_dir, df):
     smps = list(df.index)
-    for d in ['0_lowqual_removal', '1_adapter_removal', '2_host_removal']:
-        for s in smps:
-            os.remove(join(work_dir, 'short_read_qc', d, s + '_1.fastq.gz'))
-            os.remove(join(work_dir, 'short_read_qc', d, s + '_2.fastq.gz'))
+    for s in smps:
+        for d in ['1', '2']:
+            for dir in ['0_lowqual_removal', '1_adapter_removal', '2_host_removal']:
+                os.remove(join(work_dir, 'short_read_qc', dir, s + '_' + d + '.fastq.gz'))
+            for dir in glob.glob(join(work_dir, 'short_read_qc', '3_error_removal')):
+                os.remove(join(work_dir, 'short_read_qc', '3_error_removal', dir, s + '_tmp_' + d + '.fastq.gz'))
 
 
 # --- Workflow functions --- #

@@ -1,2 +1,2 @@
 sample_name,illumina_fwd,illumina_rev
-uhgg,/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/3_error_removal/uhgg_1.fastq.gz,/lustre2/home/lam4003/bin/camp_short-read-quality-control/test_out/short_read_qc/3_error_removal/uhgg_2.fastq.gz
+uhgg,/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg_1.fastq.gz,/home/lam4003/bin/camp_short-read-quality-control/test_data/test_out/short_read_qc/3_error_removal/uhgg_2.fastq.gz
