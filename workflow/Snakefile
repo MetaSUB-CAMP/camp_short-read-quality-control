@@ -205,20 +205,20 @@ rule filter_seq_errors_tp:
     output:
         fwd = join(dirs.OUT, '3_error_removal', 'tadpole', '{sample}_1.fastq.gz'),
         rev = join(dirs.OUT, '3_error_removal', 'tadpole', '{sample}_2.fastq.gz'),
+    conda:
+        join(config['env_yamls'], 'bbmap.yaml'),
     log:
         join(dirs.LOG, 'error_removal', '{sample}.out')
     threads: config['filter_seq_errors_threads'],
     resources:
         mem_mb = config['filter_seq_errors_mem_mb'],
     params:
-        repair_scr = config['repair_scr'],
-        tadpole_scr = config['tadpole_scr'],
         fwd = join(dirs.OUT, '3_error_removal', 'tadpole', '{sample}_tmp_1.fastq.gz'),
         rev = join(dirs.OUT, '3_error_removal', 'tadpole', '{sample}_tmp_2.fastq.gz'),
     shell:
         """
-        {params.repair_scr} in={input[0]} in2={input[1]} out={params.fwd} out2={params.rev}
-        {params.tadpole_scr} mode=correct  t={threads} in={params.fwd} in2={params.rev} out={output.fwd} out2={output.rev}
+        repair.sh in={input.fwd} in2={input.rev} out={params.fwd} out2={params.rev}
+        tadpole.sh mode=correct  t={threads} in={params.fwd} in2={params.rev} out={output.fwd} out2={output.rev}
         """
 
 

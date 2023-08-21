@@ -27,8 +27,6 @@ host_reference_database: ''
 
 # Options (must choose one): 'bayeshammer', 'tadpole'
 error_correction: 'tadpole'
-repair_scr: ''
-tadpole_scr: ''
 
 
 # --- qc-option --- #

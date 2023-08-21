@@ -1,6 +1,6 @@
 # CAMP Short-Read Quality Control
 
-[![Documentation Status](https://img.shields.io/readthedocs/camp_short-read-quality-control)](https://camp-documentation.readthedocs.io/en/latest/short-read-quality-control.html) ![Version](https://img.shields.io/badge/version-0.8.0-brightgreen)
+[![Documentation Status](https://img.shields.io/readthedocs/camp_short-read-quality-control)](https://camp-documentation.readthedocs.io/en/latest/short-read-quality-control.html) ![Version](https://img.shields.io/badge/version-0.9.0-brightgreen)
 
 ## Overview
 
@@ -23,25 +23,16 @@ conda env create -f configs/conda/short-read-quality-control.yaml
 conda activate short-read-quality-control
 ```
 
-3. If you don't already have bbmap and tadpole installed through conda or as a standalone JAR, do the following:
-    - Note that tadpole is a module inside the bbmap software. In order to use the module after the installation of bbmap, one needs to enter configs/parameters.yaml, and enter the paths to the `repair.sh` and `tadpole.sh` files inside the bbmap directory you just installed in the entries named `repair_scr` and `tadpole_scr`.
-    - Java is also a prerequisite, so please ensure that you have access to it in your short-read QC/default environment.
-```Bash
-cd /path/to/bin
-wget --no-check-certificate http://sourceforge.net/projects/bbmap/files/latest/download
-tar xzf download
-```
-
-4. Download the appropriate host reference genome(s) and make a Bowtie2 index using `bowtie2-build /path/to/host_reference.fa /path/to/host_reference`, and add the prefix `/path/to/host_reference` to `parameters.yaml`.
+3. Download the appropriate host reference genome(s) and make a Bowtie2 index using `bowtie2-build /path/to/host_reference.fa /path/to/host_reference`, and add the prefix `/path/to/host_reference` to `parameters.yaml`.
     - For example, I downloaded the latest major release of the human reference genome.
 ```Bash
 wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/GCA_000001405.15_GRCh38_genomic.fna.gz
 bowtie2-build --threads 20 GCA_000001405.15_GRCh38_genomic.fna.gz GCA_000001405.15_GRCh38_genomic
 ```
 
-5. Update the relevant parameters (if applicable- for example, location of external non-conda tools, bbmap, your downloaded databases) in `test_data/parameters.yaml`.
+4. Update the relevant parameters (if applicable- for example, location of external non-conda tools, your downloaded databases) in `test_data/parameters.yaml`.
 
-6. Make sure the installed pipeline works correctly. With 40 threads and a maximum of 150 GB allocated for a command (`tadpole`), the test dataset should finish in approximately 6 minutes.
+5. Make sure the installed pipeline works correctly. With 40 threads and a maximum of 150 GB allocated for a command (`tadpole`), the test dataset should finish in approximately 6 minutes.
 ```Bash
 # Run tests on the included sample dataset
 python /path/to/camp_short-read-quality-control/workflow/short-read-quality-control.py test

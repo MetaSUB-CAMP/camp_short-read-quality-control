@@ -27,8 +27,6 @@ host_reference_database: '/workdir/lam4003/Databases/GRCh38_28122022/GCA_0000014
 
 # Options (must choose one): 'bayeshammer', 'tadpole'
 error_correction: 'tadpole'
-repair_scr: '/home/lam4003/bin/bbmap/repair.sh'
-tadpole_scr: '/home/lam4003/bin/bbmap/tadpole.sh'
 
 
 # --- qc-option --- #
