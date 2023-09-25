@@ -24,9 +24,9 @@ def extract_from_gzip(ap, out):
 def ingest_samples(samples, tmp):
     df = pd.read_csv(samples, header = 0, index_col = 0) # name, fwd, rev
     s = list(df.index)
-    lst = [str(l) for l in df.values.tolist()]
+    lst = df.values.tolist()
     for i,l in enumerate(lst):
-        if not exists(join(tmp, s[i] + '_1.fastq.gz')):
+        if not exists(join(tmp, s[i] + '_1.fastq')):
             extract_from_gzip(abspath(l[0]), join(tmp, s[i] + '_1.fastq'))
             extract_from_gzip(abspath(l[1]), join(tmp, s[i] + '_2.fastq'))
     return s
