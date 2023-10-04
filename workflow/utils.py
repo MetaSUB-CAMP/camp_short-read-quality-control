@@ -14,8 +14,8 @@ import shutil
 
 
 def extract_from_gzip(ap, out):
-    if open(ap, 'rb').read(2) == b'\x1f\x8b': # If the input is gzipped
-        with gzip.open(ap, 'rb') as f_in, open(out, 'wb') as f_out:
+    if open(ap, 'rb').read(2) != b'\x1f\x8b': # If the input is not gzipped
+        with open(ap, 'rb') as f_in, gzip.open(out, 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
     else: # Otherwise, symlink
         symlink(ap, out)
@@ -26,9 +26,9 @@ def ingest_samples(samples, tmp):
     s = list(df.index)
     lst = df.values.tolist()
     for i,l in enumerate(lst):
-        if not exists(join(tmp, s[i] + '_1.fastq')):
-            extract_from_gzip(abspath(l[0]), join(tmp, s[i] + '_1.fastq'))
-            extract_from_gzip(abspath(l[1]), join(tmp, s[i] + '_2.fastq'))
+        if not exists(join(tmp, s[i] + '_1.fastq.gz')):
+            extract_from_gzip(abspath(l[0]), join(tmp, s[i] + '_1.fastq.gz'))
+            extract_from_gzip(abspath(l[1]), join(tmp, s[i] + '_2.fastq.gz'))
     return s
 
 
