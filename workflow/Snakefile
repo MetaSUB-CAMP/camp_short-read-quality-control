@@ -217,7 +217,7 @@ rule filter_seq_errors_tp:
         rev = join(dirs.OUT, '3_error_removal', 'tadpole', '{sample}_tmp_2.fastq.gz'),
     shell:
         """
-        repair.sh in={input.fwd} in2={input.rev} out={params.fwd} out2={params.rev}
+        repair.sh in={input[0]} in2={input[1]} out={params.fwd} out2={params.rev}
         tadpole.sh mode=correct  t={threads} in={params.fwd} in2={params.rev} out={output.fwd} out2={output.rev}
         """
 
