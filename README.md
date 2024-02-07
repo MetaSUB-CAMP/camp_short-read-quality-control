@@ -1,6 +1,8 @@
 # Short-Read Quality Control
 
-[![Documentation Status](https://img.shields.io/readthedocs/camp_short-read-quality-control)](https://camp-documentation.readthedocs.io/en/latest/shortreadqc/index.html) ![Version](https://img.shields.io/badge/version-0.9.4-brightgreen)
+[![Documentation Status](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://camp-documentation.readthedocs.io/en/latest/shortreadqc/index.html) ![Version](https://img.shields.io/badge/version-0.9.4-brightgreen)
+
+<!-- [![Documentation Status](https://img.shields.io/readthedocs/camp_short-read-quality-control)]() -->
 
 ## Overview
 
