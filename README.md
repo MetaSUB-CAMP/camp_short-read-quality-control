@@ -1,6 +1,6 @@
 # Short-Read Quality Control
 
-[![Documentation Status](https://img.shields.io/readthedocs/camp_short-read-quality-control)](https://camp-documentation.readthedocs.io/en/latest/shortreadqc/index.html) ![Version](https://img.shields.io/badge/version-0.9.4-brightgreen)
+[![Documentation Status](https://img.shields.io/readthedocs/camp_short-read-quality-control)](https://camp-documentation.readthedocs.io/en/latest/shortreadqc/index.html) ![Version](https://img.shields.io/badge/version-0.9.5-brightgreen)
 
 ## Overview
 
@@ -22,6 +22,9 @@ cd camp_short-read-quality-control
 conda env create -f configs/conda/short-read-quality-control.yaml
 conda activate short-read-quality-control
 ```
+
+> [!TIP]
+> All databases used in CAMP modules will also be available for download on Zenodo (link TBD).
 
 3. Download the appropriate host reference genome(s) and make a Bowtie2 index using `bowtie2-build /path/to/host_reference.fa /path/to/host_reference`, and add the prefix `/path/to/host_reference` to `parameters.yaml`.
     - For example, I downloaded the latest major release of the human reference genome.
