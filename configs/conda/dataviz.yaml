@@ -1,7 +1,6 @@
 name: dataviz
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - anyio=3.5.0=py310hecd8cb5_0
   - appnope=0.1.2=py310hecd8cb5_1001
